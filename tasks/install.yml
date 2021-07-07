@@ -1,0 +1,95 @@
+---
+# tasks file for roles/docker
+
+- name: install docker dependencies
+  become: yes
+  apt:
+    pkg: "{{ docker_package_dependencies }}"
+    state: present
+    force_apt_get: yes # apt-get instead of aptitude
+    update_cache: yes
+  when: docker_package_dependencies is defined and (docker_package_dependencies | length>0)
+  tags: docker
+
+# ------------------------------------------------------------------------------
+
+- name: add docker Apt signing key, will not download if present
+  become: yes
+  apt_key:
+    url: "{{ docker_install.pgp }}"
+    state: present
+  tags: docker
+
+- name: get OS distribution
+  command: lsb_release -sc
+  register: os_distribution
+  tags: docker
+
+- name: get OS architecture
+  shell: dpkg --print-architecture
+  register: os_architecture
+  tags: docker
+
+- name: add docker repository into sources list
+  become: yes
+  apt_repository:
+    repo: "deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ os_distribution.stdout }} {{ docker_install.version }}"
+    state: present
+    # update_cache: no
+  tags: docker
+
+# - name: update repositories
+#   become: yes
+#   apt:
+#     update_cache: yes # equivalent of apt-get update
+#     force_apt_get: yes # apt-get instead of aptitude
+#   tags: docker
+
+- name: install docker packages (apt)
+  become: yes
+  apt:
+    pkg: "{{ docker_install.apt }}"
+    state: present
+    update_cache: yes
+    force_apt_get: yes # apt-get instead of aptitude
+  when: docker_install.apt is not none and (docker_install.apt|length>0)
+  tags: docker
+
+- name: install docker packages (pip)
+  become: yes
+  pip:
+    name: "{{ item }}"
+    executable: pip3
+  loop: "{{ docker_install.pip | flatten(levels=1) }}"
+  when: docker_install is defined and docker_install.pip is defined and docker_install.pip is not none
+  tags: docker
+
+# ------------------------------------------------------------------------------
+
+- name: "create docker group"
+  become: yes
+  group:
+    name: "{{ docker_group_default }}"
+    state: present
+    system: yes
+  tags: docker
+
+- name: "create docker user"
+  become: yes
+  user:
+    name: "{{ docker_user_default }}"
+    groups: "{{ docker_group_default }}"
+    comment: "manage docker access"
+    system: yes
+    shell: "{{ docker_user_shell }}"
+  tags: docker
+
+- name: "adding user to group {{ docker_group_default }}"
+  become: yes
+  user:
+    name: "{{ item.name }}"
+    groups: "{{ docker_group_default }}"
+    append: yes
+  loop: "{{ docker_users_to_add_group | flatten(levels=1) }}"
+  when: "docker_users_to_add_group is not none and (docker_users_to_add_group | length>0)"
+  tags: docker
