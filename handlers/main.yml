@@ -1,2 +1,10 @@
 ---
 # handlers file for roles/docker
+
+- name: restart docker-service
+  become: true
+  service:
+    name: docker
+    state: restarted
+    enabled: yes
+  listen: restart docker-service
