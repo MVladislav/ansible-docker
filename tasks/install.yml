@@ -1,6 +1,7 @@
 ---
 # tasks file for roles/docker
 
+# ------------------------------------------------------------------------------
 - name: install docker dependencies
   become: true
   apt:
@@ -12,12 +13,14 @@
   tags: docker
 
 # ------------------------------------------------------------------------------
-
 - name: add docker Apt signing key, will not download if present
   become: true
-  apt_key:
-    url: "{{ docker_install.pgp }}"
-    state: present
+  # apt_key:
+  #   id: "{{ docker_install.gpg.id }}"
+  #   url: "{{ docker_install.gpg.url }}"
+  #   keyring: "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}"
+  #   state: present
+  shell: curl -sL "{{ docker_install.gpg.url }}" | gpg --dearmor | tee "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}" >/dev/null
   tags: docker
 
 - name: get OS distribution

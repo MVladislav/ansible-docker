@@ -14,8 +14,10 @@ docker_package_dependencies:
   - software-properties-common
 
 docker_install:
-  pgp: https://download.docker.com/linux/ubuntu/gpg
-  fingerprint: 0EBFCD88
+  gpg:
+    id: 0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg
+    name: docker_release_ce.gpg
   repo: "https://download.docker.com/linux/ubuntu"
   version: "stable"
   apt:
