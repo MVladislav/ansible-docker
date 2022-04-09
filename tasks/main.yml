@@ -7,7 +7,7 @@
 
 # ------------------------------------------------------------------------------
 - name: "docker conf setup - /etc/default/docker"
-  become: yes
+  become: true
   ansible.builtin.copy:
     dest: /etc/default/docker
     content: |
