@@ -1,8 +1,9 @@
 ---
 # tasks file for roles/docker
 
+# ------------------------------------------------------------------------------
 - name: install docker dependencies
-  become: yes
+  become: true
   apt:
     pkg: "{{ docker_package_dependencies }}"
     state: present
@@ -12,12 +13,14 @@
   tags: docker
 
 # ------------------------------------------------------------------------------
-
 - name: add docker Apt signing key, will not download if present
-  become: yes
-  apt_key:
-    url: "{{ docker_install.pgp }}"
-    state: present
+  become: true
+  # apt_key:
+  #   id: "{{ docker_install.gpg.id }}"
+  #   url: "{{ docker_install.gpg.url }}"
+  #   keyring: "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}"
+  #   state: present
+  shell: curl -sL "{{ docker_install.gpg.url }}" | gpg --dearmor | tee "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}" >/dev/null
   tags: docker
 
 - name: get OS distribution
@@ -31,7 +34,7 @@
   tags: docker
 
 - name: add docker repository into sources list
-  become: yes
+  become: true
   apt_repository:
     repo: "deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ os_distribution.stdout }} {{ docker_install.version }}"
     state: present
@@ -39,14 +42,14 @@
   tags: docker
 
 # - name: update repositories
-#   become: yes
+#   become: true
 #   apt:
 #     update_cache: yes # equivalent of apt-get update
 #     force_apt_get: yes # apt-get instead of aptitude
 #   tags: docker
 
 - name: install docker packages (apt)
-  become: yes
+  become: true
   apt:
     pkg: "{{ docker_install.apt }}"
     state: present
@@ -56,7 +59,7 @@
   tags: docker
 
 - name: install docker packages (pip)
-  become: yes
+  become: true
   pip:
     name: "{{ item }}"
     executable: pip3
@@ -67,7 +70,7 @@
 # ------------------------------------------------------------------------------
 
 - name: "create docker group"
-  become: yes
+  become: true
   group:
     name: "{{ docker_group_default }}"
     state: present
@@ -75,7 +78,7 @@
   tags: docker
 
 - name: "create docker user"
-  become: yes
+  become: true
   user:
     name: "{{ docker_user_default }}"
     groups: "{{ docker_group_default }}"
@@ -85,7 +88,7 @@
   tags: docker
 
 - name: "adding user to group {{ docker_group_default }}"
-  become: yes
+  become: true
   user:
     name: "{{ item.name }}"
     groups: "{{ docker_group_default }}"
