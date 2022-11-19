@@ -1,0 +1,52 @@
+{
+{# SECTION 2 #}
+{# ============================================================================== #}
+{% if docker_cis_rule_2_2 == true -%}
+  "icc": false,
+{% endif %}
+{% if docker_cis_rule_2_3 == true -%}
+  "log-level": "info",
+{% endif %}
+{% if docker_cis_rule_2_4 == true -%}
+  "iptables": true,
+{% endif %}
+{% if docker_cis_rule_2_6 == true -%}
+  "storage-driver": "overlay2",
+{% endif %}
+{#
+docker_cis_rule_2_7: true
+{% if docker_cis_rule_2_7 == true -%}
+  "tlsverify": true ,
+  "tlscacert": true ,
+  "tlscert": true ,
+  "tlskey": true,
+{% endif %}
+#}
+{% if docker_cis_rule_2_8 == true -%}
+  "default-ulimit": [
+    "nofile=65535:65535",
+    "nproc=1024:2048",
+    "memlock=-1:-1",
+    "fsize=-1",
+    "as=-1"
+  ],
+{% endif %}
+{% if docker_cis_rule_2_9 == true and docker_cis_rule_2_1 == true -%}
+  "userns-remap": "default",
+{% endif %}
+{% if docker_cis_rule_2_13 == true -%}
+  "log-driver": "syslog",
+{% endif %}
+{% if docker_cis_rule_2_14 == true -%}
+  "no-new-privileges": true,
+{% endif %}
+{% if docker_cis_rule_2_15 == true -%}
+  "live-restore": true,
+{% endif %}
+{% if docker_cis_rule_2_16 == true -%}
+  "userland-proxy": false,
+{% endif %}
+{% if docker_cis_rule_2_18 == true -%}
+  "experimental": false
+{% endif %}
+}
