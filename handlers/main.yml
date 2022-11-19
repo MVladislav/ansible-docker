@@ -1,10 +1,32 @@
 ---
 # handlers file for roles/docker
 
-- name: restart docker-service
+- name: Restart docker-service
   become: true
-  service:
-    name: docker
+  become_user: "{{ docker_user_default }}"
+  ansible.builtin.service:
+    name: docker.service
     state: restarted
-    enabled: yes
+    enabled: true
+    scope: user
   listen: restart docker-service
+  when:
+    - docker_cis_rule_2_1 | bool
+
+- name: Restart docker-service
+  become: true
+  ansible.builtin.service:
+    name: docker.service
+    state: restarted
+    enabled: true
+  listen: restart docker-service
+  when:
+    - not docker_cis_rule_2_1 | bool
+
+- name: Restart auditd-service
+  become: true
+  ansible.builtin.service:
+    name: auditd
+    state: restarted
+    enabled: true
+  listen: restart auditd-service

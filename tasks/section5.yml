@@ -1,0 +1,17 @@
+---
+# tasks file for roles/docker
+
+# # ------------------------------------------------------------------------------
+# - name: "AUTOMATED | 5.xxx | PATCH | desc"
+#   ansible.builtin.lineinfile:
+#     dest: /etc/...
+#     regexp: "^(#)?<NAME>(\\s|$)"
+#     line: "<NAME> <NAME_MORE>"
+#     state: present
+#     mode: "640"
+#     create: true
+#   when:
+#     - docker_cis_rule_5_xxx | bool
+#   tags:
+#     - docker
+#     - rule_5_xxx

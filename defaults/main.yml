@@ -7,11 +7,14 @@ docker_users_to_add_group: []
 # docker_type: worker # manager | worker
 
 docker_package_dependencies:
+  - systemd-container
   - apt-transport-https
   - ca-certificates
   - curl
   - gnupg-agent
   - software-properties-common
+  - python3
+  - python3-pip
 
 docker_install:
   gpg:
@@ -23,11 +26,76 @@ docker_install:
   apt:
     - docker-ce
     - docker-ce-cli
+    - docker-ce-rootless-extras
     - containerd.io
-    # - docker-compose
   pip:
     - docker-compose
 
-docker_user_default: docker-manager
+docker_user_default: docker
 docker_group_default: docker
 docker_user_shell: /bin/bash
+
+docker_daemon_json_root: /etc/docker/daemon.json
+docker_daemon_json_rootless: ~/.config/docker/daemon.json
+
+# ------------------------------------------------------------------------------
+
+# SECTION 1
+docker_cis_section1: true
+docker_cis_rule_1_1_1: true
+docker_cis_rule_1_1_2: true
+docker_cis_rule_1_1_3: true
+docker_cis_rule_1_1_4: true
+docker_cis_rule_1_1_5: true
+docker_cis_rule_1_1_6: true
+docker_cis_rule_1_1_7: true
+docker_cis_rule_1_1_8: true
+docker_cis_rule_1_1_9: true
+docker_cis_rule_1_1_10: true
+docker_cis_rule_1_1_11: true
+docker_cis_rule_1_1_12: true
+docker_cis_rule_1_1_13: true
+docker_cis_rule_1_1_14: true
+docker_cis_rule_1_1_15: true
+docker_cis_rule_1_1_16: true
+docker_cis_rule_1_1_17: true
+docker_cis_rule_1_1_18: true
+docker_cis_rule_1_2_1: true
+docker_cis_rule_1_2_2: true
+
+# SECTION 2
+docker_cis_section2: true
+docker_cis_rule_2_1: false
+docker_cis_rule_2_2: false
+docker_cis_rule_2_3: true
+docker_cis_rule_2_4: true
+docker_cis_rule_2_6: true
+# TODO: docker_cis_rule_2_7: true
+docker_cis_rule_2_8: true
+docker_cis_rule_2_9: true
+docker_cis_rule_2_13: true
+docker_cis_rule_2_14: true
+docker_cis_rule_2_15: true
+docker_cis_rule_2_16: true
+docker_cis_rule_2_18: true
+
+# SECTION 3
+docker_cis_section3: true
+docker_cis_rule_3_1: true
+docker_cis_rule_3_2: true
+docker_cis_rule_3_3: true
+docker_cis_rule_3_4: true
+docker_cis_rule_3_5: true
+docker_cis_rule_3_6: true
+# TODO: docker_cis_rule_3_7: false
+# TODO: docker_cis_rule_3_8: true
+docker_cis_rule_3_15: true
+docker_cis_rule_3_16: true
+docker_cis_rule_3_17: true
+docker_cis_rule_3_18: true
+docker_cis_rule_3_19: true
+docker_cis_rule_3_22: true
+# TODO: docker_cis_rule_3_20: true
+# TODO: docker_cis_rule_3_21: true
+docker_cis_rule_3_23: true
+docker_cis_rule_3_24: true

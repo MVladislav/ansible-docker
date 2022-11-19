@@ -1,0 +1,67 @@
+---
+# tasks file for roles/docker
+
+# ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.1 | INSTALL | Install docker dependencies"
+  ansible.builtin.apt:
+    pkg: "{{ docker_package_dependencies }}"
+    state: present
+    force_apt_get: true # apt-get instead of aptitude
+    update_cache: true
+  when: docker_package_dependencies is defined and (docker_package_dependencies | length>0)
+  tags:
+    - docker
+
+# ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.2 | INSTALL | add docker Apt signing key, will not download if present"
+  ansible.builtin.shell: >
+    set -o pipefail | curl -sL "{{ docker_install.gpg.url }}" | gpg --dearmor | tee "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}" >/dev/null
+  args:
+    executable: /bin/bash
+  changed_when: false
+  tags:
+    - docker
+
+- name: "DOCKER | 0.0.2 | INSTALL | get OS distribution"
+  ansible.builtin.command: lsb_release -sc
+  changed_when: false
+  register: os_distribution
+  tags:
+    - docker
+
+- name: "DOCKER | 0.0.2 | INSTALL | get OS architecture"
+  ansible.builtin.command: dpkg --print-architecture
+  changed_when: false
+  register: os_architecture
+  tags:
+    - docker
+
+- name: >
+    DOCKER | 0.0.2 | INSTALL | add docker repository into sources list as:
+    deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ os_distribution.stdout }} {{ docker_install.version }}
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ os_distribution.stdout }} {{ docker_install.version }}"
+    state: present
+    # update_cache: no
+  tags:
+    - docker
+
+# ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.3 | INSTALL | install docker packages (apt)"
+  ansible.builtin.apt:
+    pkg: "{{ docker_install.apt }}"
+    state: present
+    update_cache: true
+    force_apt_get: true # apt-get instead of aptitude
+  when: docker_install.apt is not none and (docker_install.apt|length>0)
+  tags:
+    - docker
+
+- name: "DOCKER | 0.0.4 | INSTALL | install docker packages (pip)"
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    executable: pip3
+  loop: "{{ docker_install.pip | flatten(levels=1) }}"
+  when: docker_install is defined and docker_install.pip is defined and docker_install.pip is not none
+  tags:
+    - docker

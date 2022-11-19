@@ -1,37 +1,63 @@
 ---
 # tasks file for roles/docker
 
-# docker
 - name: install docker
-  include: install.yml
-
-# ------------------------------------------------------------------------------
-- name: "docker conf setup - /etc/default/docker"
+  import_tasks: section0.yml
   become: true
-  ansible.builtin.copy:
-    dest: /etc/default/docker
-    content: |
-      # Docker Upstart and SysVinit configuration file
+  tags:
+    - docker
+    - section0
 
-      #
-      # THIS FILE DOES NOT APPLY TO SYSTEMD
-      #
-      #   Please see the documentation for "systemd drop-ins":
-      #   https://docs.docker.com/engine/admin/systemd/
-      #
+- name: section1
+  import_tasks: section1.yml
+  become: true
+  when: docker_cis_section1 | bool
+  tags:
+    - docker
+    - section1
 
-      # Customize location of Docker binary (especially for development testing).
-      #DOCKERD="/usr/local/bin/dockerd"
+- name: section2
+  import_tasks: section2.yml
+  become: true
+  when: docker_cis_section2 | bool
+  tags:
+    - docker
+    - section2
 
-      # Use DOCKER_OPTS to modify the daemon startup options.
-      #DOCKER_OPTS="--dns 8.8.8.8 --dns 8.8.4.4"
-      DOCKER_OPTS="--iptables=false"
+- name: section3
+  import_tasks: section3.yml
+  become: true
+  when: docker_cis_section3 | bool
+  tags:
+    - docker
+    - section3
+#
+# ------------------------------------------------------------------------------
+# - name: "docker conf setup - /etc/default/docker"
+#   become: true
+#   ansible.builtin.copy:
+#     dest: /etc/default/docker
+#     content: |
+#       # Docker Upstart and SysVinit configuration file
 
-      # If you need Docker to use an HTTP proxy, it can also be specified here.
-      #export http_proxy="http://127.0.0.1:3128/"
+#       #
+#       # THIS FILE DOES NOT APPLY TO SYSTEMD
+#       #
+#       #   Please see the documentation for "systemd drop-ins":
+#       #   https://docs.docker.com/engine/admin/systemd/
+#       #
 
-      # This is also a handy place to tweak where Docker's temporary files go.
-      #export DOCKER_TMPDIR="/mnt/bigdrive/docker-tmp"
-  notify:
-    - restart docker-service
-  tags: docker
+#       # Customize location of Docker binary (especially for development testing).
+#       #DOCKERD="/usr/local/bin/dockerd"
+
+#       # Use DOCKER_OPTS to modify the daemon startup options.
+#       #DOCKER_OPTS="--dns 8.8.8.8 --dns 8.8.4.4"
+
+#       # If you need Docker to use an HTTP proxy, it can also be specified here.
+#       #export http_proxy="http://127.0.0.1:3128/"
+
+#       # This is also a handy place to tweak where Docker's temporary files go.
+#       #export DOCKER_TMPDIR="/mnt/bigdrive/docker-tmp"
+#   notify:
+#     - restart docker-service
+#   tags: docker
