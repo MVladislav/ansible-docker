@@ -1,11 +1,13 @@
 # ansible-docker
 
+[![Ansible Lint](https://github.com/MVladislav/ansible-docker/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/MVladislav/ansible-docker/actions/workflows/ansible-lint.yml)
+
 ---
 
 - [ansible-docker](#ansible-docker)
   - [Role Variables](#role-variables)
   - [Example Playbook](#example-playbook)
-  - [CIS_Docker_Benchmark_v1.4.0](#cis_docker_benchmark_v140)
+  - [CIS\_Docker\_Benchmark\_v1.4.0](#cis_docker_benchmark_v140)
   - [License](#license)
   - [Resources](#resources)
 
