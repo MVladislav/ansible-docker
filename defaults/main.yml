@@ -21,20 +21,20 @@ docker_install:
     id: 0EBFCD88
     url: https://download.docker.com/linux/ubuntu/gpg
     name: docker_release_ce.gpg
-  repo: "https://download.docker.com/linux/ubuntu"
-  version: "stable"
+  repo: https://download.docker.com/linux/ubuntu
+  version: stable
   # NOTE: manual update when newer version available
   # NOTE: will fallback when current install under lunar
-  release_fallback: kinetic
+  release_fallback: jammy
   apt:
     - docker-ce
     - docker-ce-cli
     - docker-ce-rootless-extras
     - containerd.io
+    - docker-compose-plugin
   # TODO: why docker-compose not anymore installable ?
-  pip:
-    []
-    # - docker-compose
+  pip: []
+  # - docker-compose
 
 docker_user_default: docker
 docker_group_default: docker
@@ -75,8 +75,10 @@ docker_cis_rule_2_1: false
 docker_cis_rule_2_2: false
 docker_cis_rule_2_3: true
 docker_cis_rule_2_4: true
-docker_cis_rule_2_6: true
-# TODO: docker_cis_rule_2_7: true
+# TODO: 2.6 is set to false, because runs into failure, need to be checked
+docker_cis_rule_2_6: false
+# TODO:  2.7 is set to false, because not tested and will run into error
+docker_cis_rule_2_7: false
 docker_cis_rule_2_8: true
 docker_cis_rule_2_9: true
 docker_cis_rule_2_13: true

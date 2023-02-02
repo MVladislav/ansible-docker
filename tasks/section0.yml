@@ -15,7 +15,9 @@
 # ------------------------------------------------------------------------------
 - name: "DOCKER | 0.0.2 | INSTALL | add docker Apt signing key, will not download if present"
   ansible.builtin.shell: >
-    set -o pipefail | curl -sL "{{ docker_install.gpg.url }}" | gpg --dearmor | tee "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}" >/dev/null
+    set -o pipefail
+    && curl -fsSL "{{ docker_install.gpg.url }}"
+    | gpg --dearmor | tee "/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}" >/dev/null
   args:
     executable: /bin/bash
   changed_when: false
@@ -52,17 +54,33 @@
     - docker
 
 - name: >
-    DOCKER | 0.0.2 | INSTALL | add docker repository into sources list as:
-    deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ lsb_release }} {{ docker_install.version }}
+    DOCKER | 0.0.2 | INSTALL |
+    add docker repository into sources list as:
+    deb [arch={{ os_architecture.stdout }} signed-by=/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}]
+    {{ docker_install.repo }} {{ lsb_release }} {{ docker_install.version }}
   ansible.builtin.apt_repository:
-    repo: "deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ lsb_release }} {{ docker_install.version }}"
+    repo: >
+      deb [arch={{ os_architecture.stdout }} signed-by=/etc/apt/trusted.gpg.d/{{ docker_install.gpg.name }}]
+      {{ docker_install.repo }} {{ lsb_release }} {{ docker_install.version }}
     state: present
-    # update_cache: no
   tags:
     - docker
 
 # ------------------------------------------------------------------------------
-- name: "DOCKER | 0.0.3 | INSTALL | get list of outdated pip packages"
+- name: "DOCKER | 0.0.3 | INSTALL | install docker packages (apt)"
+  ansible.builtin.apt:
+    pkg: "{{ docker_install.apt }}"
+    state: present
+    force_apt_get: true # apt-get instead of aptitude
+    update_cache: true
+  when:
+    - docker_install.apt is not none
+    - docker_install.apt | length>0
+  tags:
+    - docker
+
+# ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.4 | INSTALL | get list of outdated pip packages"
   ansible.builtin.shell: >
     set -o pipefail &&
     python3 -m pip list -o | cut -f1 -d" " | tr " " "\n" | awk "{if(NR>=3)print}" | cut -d" " -f1
@@ -91,20 +109,7 @@
     - install_server
     - install_python
 
-# ------------------------------------------------------------------------------
-- name: "DOCKER | 0.0.5 | INSTALL | install docker packages (apt)"
-  ansible.builtin.apt:
-    pkg: "{{ docker_install.apt }}"
-    state: present
-    force_apt_get: true # apt-get instead of aptitude
-    update_cache: true
-  when:
-    - docker_install.apt is not none
-    - docker_install.apt | length>0
-  tags:
-    - docker
-
-- name: "DOCKER | 0.0.6 | INSTALL | install docker packages (pip)"
+- name: "DOCKER | 0.0.5 | INSTALL | install docker packages (pip)"
   ansible.builtin.pip:
     name: "{{ item }}"
     executable: pip3

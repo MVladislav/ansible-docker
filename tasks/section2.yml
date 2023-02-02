@@ -189,6 +189,7 @@
     - restart docker-service
   when:
     - docker_cis_rule_2_1 | bool
+  register: docker_daemon_changed
   tags:
     - docker
     - rule_2_2
@@ -207,9 +208,9 @@
 - name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | PATCH | check and create folder for daemon.json"
   become: true
   ansible.builtin.file:
-    path: "{{ docker_daemon_json_root }}"
+    path: "/etc/docker"
     state: directory
-    mode: "755"
+    mode: "750"
   when:
     - not docker_cis_rule_2_1 | bool
   tags:
@@ -239,6 +240,7 @@
     - restart docker-service
   when:
     - not docker_cis_rule_2_1 | bool
+  register: docker_daemon_changed
   tags:
     - docker
     - rule_2_2
@@ -253,3 +255,26 @@
     - rule_2_15
     - rule_2_16
     - rule_2_18
+
+- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | restart docker-service"
+  become: true
+  become_user: "{{ docker_user_default }}"
+  ansible.builtin.service:
+    name: docker.service
+    state: restarted
+    enabled: true
+  when:
+    - docker_cis_rule_2_1 | bool
+    - docker_daemon_changed is defined
+    - docker_daemon_changed.changed | bool
+
+- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | restart docker-service"
+  become: true
+  ansible.builtin.service:
+    name: docker.service
+    state: restarted
+    enabled: true
+  when:
+    - not docker_cis_rule_2_1 | bool
+    - docker_daemon_changed is defined
+    - docker_daemon_changed.changed | bool
