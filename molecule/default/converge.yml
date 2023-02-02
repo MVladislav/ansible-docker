@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include ansible-docker"
+      include_role:
+        name: "ansible-docker"
+  vars:
+    # rootless not possible to test under docker, because reboot is current needed
+    docker_cis_rule_2_1: false # to run install in rootless mode
+    docker_users_to_add_group:
+      - name: "ubuntu"
