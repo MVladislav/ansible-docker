@@ -23,13 +23,18 @@ docker_install:
     name: docker_release_ce.gpg
   repo: "https://download.docker.com/linux/ubuntu"
   version: "stable"
+  # NOTE: manual update when newer version available
+  # NOTE: will fallback when current install under lunar
+  release_fallback: kinetic
   apt:
     - docker-ce
     - docker-ce-cli
     - docker-ce-rootless-extras
     - containerd.io
+  # TODO: why docker-compose not anymore installable ?
   pip:
-    - docker-compose
+    []
+    # - docker-compose
 
 docker_user_default: docker
 docker_group_default: docker
@@ -65,6 +70,7 @@ docker_cis_rule_1_2_2: true
 
 # SECTION 2
 docker_cis_section2: true
+# set true to install rootless, false for as root
 docker_cis_rule_2_1: false
 docker_cis_rule_2_2: false
 docker_cis_rule_2_3: true

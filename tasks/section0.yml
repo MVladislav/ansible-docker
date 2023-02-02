@@ -22,13 +22,6 @@
   tags:
     - docker
 
-- name: "DOCKER | 0.0.2 | INSTALL | get OS distribution"
-  ansible.builtin.command: lsb_release -sc
-  changed_when: false
-  register: os_distribution
-  tags:
-    - docker
-
 - name: "DOCKER | 0.0.2 | INSTALL | get OS architecture"
   ansible.builtin.command: dpkg --print-architecture
   changed_when: false
@@ -36,32 +29,89 @@
   tags:
     - docker
 
+- name: "DOCKER | 0.0.2 | INSTALL | get OS distribution"
+  ansible.builtin.set_fact:
+    lsb_release: "{{ ansible_lsb.codename | lower }}"
+  tags:
+    - docker
+
+- name: "DOCKER | 0.0.2 | INSTALL | check if Docker repository is available"
+  ansible.builtin.uri:
+    url: "https://download.docker.com/linux/ubuntu/dists/{{ lsb_release }}/{{ docker_install.version }}"
+    return_content: yes
+  ignore_errors: yes
+  register: docker_repo_check
+  tags:
+    - docker
+
+- name: DOCKER | 0.0.2 | INSTALL | choose fallback Docker repository
+  ansible.builtin.set_fact:
+    lsb_release: "{{ docker_install.release_fallback }}"
+  when: docker_repo_check.status != 200
+  tags:
+    - docker
+
 - name: >
     DOCKER | 0.0.2 | INSTALL | add docker repository into sources list as:
-    deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ os_distribution.stdout }} {{ docker_install.version }}
+    deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ lsb_release }} {{ docker_install.version }}
   ansible.builtin.apt_repository:
-    repo: "deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ os_distribution.stdout }} {{ docker_install.version }}"
+    repo: "deb [arch={{ os_architecture.stdout }}] {{ docker_install.repo }} {{ lsb_release }} {{ docker_install.version }}"
     state: present
     # update_cache: no
   tags:
     - docker
 
 # ------------------------------------------------------------------------------
-- name: "DOCKER | 0.0.3 | INSTALL | install docker packages (apt)"
-  ansible.builtin.apt:
-    pkg: "{{ docker_install.apt }}"
-    state: present
-    update_cache: true
-    force_apt_get: true # apt-get instead of aptitude
-  when: docker_install.apt is not none and (docker_install.apt|length>0)
+- name: "DOCKER | 0.0.3 | INSTALL | get list of outdated pip packages"
+  ansible.builtin.shell: >
+    set -o pipefail &&
+    python3 -m pip list -o | cut -f1 -d" " | tr " " "\n" | awk "{if(NR>=3)print}" | cut -d" " -f1
+  args:
+    executable: /bin/bash
+  register: pip_outdated
+  changed_when: pip_outdated.rc in [1]
+  failed_when: pip_outdated.rc not in [0, 1]
+  when:
+    - docker_install is defined
+    - docker_install.pip is defined
   tags:
     - docker
 
-- name: "DOCKER | 0.0.4 | INSTALL | install docker packages (pip)"
+- name: "DOCKER | 0.0.4 | INSTALL | update all installed pip packages"
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    extra_args: --upgrade
+    executable: pip3
+  with_items: "{{ pip_outdated.stdout_lines }}"
+  failed_when: pip_outdated.rc not in [0, 1]
+  when:
+    - docker_install is defined
+    - docker_install.pip is defined
+  tags:
+    - install_server
+    - install_python
+
+# ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.5 | INSTALL | install docker packages (apt)"
+  ansible.builtin.apt:
+    pkg: "{{ docker_install.apt }}"
+    state: present
+    force_apt_get: true # apt-get instead of aptitude
+    update_cache: true
+  when:
+    - docker_install.apt is not none
+    - docker_install.apt | length>0
+  tags:
+    - docker
+
+- name: "DOCKER | 0.0.6 | INSTALL | install docker packages (pip)"
   ansible.builtin.pip:
     name: "{{ item }}"
     executable: pip3
   loop: "{{ docker_install.pip | flatten(levels=1) }}"
-  when: docker_install is defined and docker_install.pip is defined and docker_install.pip is not none
+  when:
+    - docker_install is defined
+    - docker_install.pip is defined
+    - docker_install.pip is not none
   tags:
     - docker

@@ -1,31 +1,31 @@
 ---
 # tasks file for roles/docker
 
-- name: install docker
-  import_tasks: section0.yml
+- name: "DOCKER | install docker"
+  ansible.builtin.import_tasks: section0.yml
   become: true
   tags:
     - docker
     - section0
 
-- name: section1
-  import_tasks: section1.yml
+- name: "DOCKER | section1"
+  ansible.builtin.import_tasks: section1.yml
   become: true
   when: docker_cis_section1 | bool
   tags:
     - docker
     - section1
 
-- name: section2
-  import_tasks: section2.yml
+- name: "DOCKER | section2"
+  ansible.builtin.import_tasks: section2.yml
   become: true
   when: docker_cis_section2 | bool
   tags:
     - docker
     - section2
 
-- name: section3
-  import_tasks: section3.yml
+- name: "DOCKER | section3"
+  ansible.builtin.import_tasks: section3.yml
   become: true
   when: docker_cis_section3 | bool
   tags:
