@@ -15,13 +15,23 @@ platforms:
     tmpfs:
       - /run
       - /tmp
-    cgroupns_mode: host
     privileged: true
-    capabilities:
-      - SYS_ADMIN
+    cgroupns_mode: host
     pre_build_image: true
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      host_key_checking: false
+      stdout_callback: yaml
+      timeout: 10
+      display_skipped_hosts: true
+      show_per_host_start: true
+      callbacks_enabled: community.general.yaml
+      bin_ansible_callbacks: true
+    ssh_connection:
+      scp_if_ssh: true
+      transfer_method: piped
   inventory:
     group_vars:
       all:
