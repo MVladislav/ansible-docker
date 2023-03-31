@@ -32,9 +32,8 @@ docker_install:
     - docker-ce-rootless-extras
     - containerd.io
     - docker-compose-plugin
-  # TODO: why docker-compose not anymore installable ?
-  pip: []
-  # - docker-compose
+  pip:
+    - docker-compose
 
 docker_user_default: docker
 docker_group_default: docker
