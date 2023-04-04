@@ -26,6 +26,7 @@ docker_install:
   # NOTE: manual update when newer version available
   # NOTE: will fallback when current install under lunar
   release_fallback: jammy
+  release_skip_lunar: lunar
   apt:
     - docker-ce
     - docker-ce-cli
