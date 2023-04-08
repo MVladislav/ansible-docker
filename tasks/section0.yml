@@ -2,13 +2,35 @@
 # tasks file for roles/docker
 
 # ------------------------------------------------------------------------------
-- name: "DOCKER | 0.0.1 | INSTALL | Install docker dependencies"
+- name: "DOCKER | 0.0.0 | INSTALL | check python version for arg '--break-system-packages'"
+  ansible.builtin.set_fact:
+    py_extra_args: "--break-system-packages"
+  when:
+    - docker_install_pip is defined
+    - ansible_python_version >= "3.11"
+  tags:
+    - docker
+
+# ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.1 | INSTALL | install docker dependencies"
   ansible.builtin.apt:
     pkg: "{{ docker_package_dependencies }}"
     state: present
     force_apt_get: true # apt-get instead of aptitude
     update_cache: true
   when: docker_package_dependencies is defined and (docker_package_dependencies | length>0)
+  tags:
+    - docker
+
+- name: "DOCKER | 0.0.1 | INSTALL | install docker dependencies (pip)"
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    extra_args: "{{ py_extra_args }}"
+    executable: pip3
+  loop: "{{ docker_pip_dependencies | flatten(levels=1) }}"
+  when:
+    - docker_pip_dependencies is defined
+    - docker_pip_dependencies is not none
   tags:
     - docker
 
@@ -80,15 +102,6 @@
     - docker
 
 # ------------------------------------------------------------------------------
-- name: "DOCKER | 0.0.4 | INSTALL | update all installed pip packages | check python version"
-  ansible.builtin.set_fact:
-    extra_args: "--break-system-packages"
-  when:
-    - docker_install_pip is defined
-    - ansible_python_version >= "3.11"
-  tags:
-    - docker
-
 - name: "DOCKER | 0.0.4 | INSTALL | get list of outdated pip packages"
   ansible.builtin.shell: >
     set -o pipefail &&
@@ -106,7 +119,7 @@
 - name: "DOCKER | 0.0.4 | INSTALL | update all installed pip packages"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: "--upgrade {{ extra_args }}"
+    extra_args: "--upgrade {{ py_extra_args }}"
   with_items: "{{ pip_outdated.stdout_lines }}"
   when:
     - docker_install_pip is defined
@@ -116,7 +129,7 @@
 - name: "DOCKER | 0.0.5 | INSTALL | install docker packages (pip)"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: "{{ extra_args }}"
+    extra_args: "{{ py_extra_args }}"
     executable: pip3
   loop: "{{ docker_install_pip | flatten(levels=1) }}"
   when:
