@@ -80,6 +80,15 @@
     - docker
 
 # ------------------------------------------------------------------------------
+- name: "DOCKER | 0.0.4 | INSTALL | update all installed pip packages | check python version"
+  ansible.builtin.set_fact:
+    extra_args: "--break-system-packages"
+  when:
+    - docker_install_pip is defined
+    - ansible_python_version >= "3.11"
+  tags:
+    - docker
+
 - name: "DOCKER | 0.0.4 | INSTALL | get list of outdated pip packages"
   ansible.builtin.shell: >
     set -o pipefail &&
@@ -97,7 +106,7 @@
 - name: "DOCKER | 0.0.4 | INSTALL | update all installed pip packages"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: --upgrade --break-system-packages
+    extra_args: "--upgrade {{ extra_args }}"
   with_items: "{{ pip_outdated.stdout_lines }}"
   when:
     - docker_install_pip is defined
@@ -107,7 +116,7 @@
 - name: "DOCKER | 0.0.5 | INSTALL | install docker packages (pip)"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: --break-system-packages
+    extra_args: "{{ extra_args }}"
     executable: pip3
   loop: "{{ docker_install_pip | flatten(levels=1) }}"
   when:
