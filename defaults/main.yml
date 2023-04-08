@@ -16,25 +16,24 @@ docker_package_dependencies:
   - python3
   - python3-pip
 
-docker_install:
-  gpg:
-    id: 0EBFCD88
-    url: https://download.docker.com/linux/ubuntu/gpg
-    name: docker_release_ce.gpg
-  repo: https://download.docker.com/linux/ubuntu
-  version: stable
-  # NOTE: manual update when newer version available
-  # NOTE: will fallback when current install under lunar
-  release_fallback: jammy
-  release_skip_lunar: lunar
-  apt:
-    - docker-ce
-    - docker-ce-cli
-    - docker-ce-rootless-extras
-    - containerd.io
-    - docker-compose-plugin
-  pip:
-    - docker-compose
+docker_install_gpg:
+  id: 0EBFCD88
+  url: https://download.docker.com/linux/ubuntu/gpg
+  name: docker_release_ce.gpg
+docker_install_repo: https://download.docker.com/linux/ubuntu
+docker_install_version: stable
+# NOTE: manual update when newer version available
+# NOTE: will fallback when current install under lunar
+docker_install_release_fallback: jammy
+docker_install_release_skip_lunar: lunar
+docker_install_apt:
+  - docker-ce
+  - docker-ce-cli
+  - docker-ce-rootless-extras
+  - containerd.io
+  - docker-compose-plugin
+docker_install_pip:
+  - docker-compose
 
 docker_user_default: docker
 docker_group_default: docker
