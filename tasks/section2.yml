@@ -98,6 +98,7 @@
 # .......................................
 - name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | run dockerd-rootless-setuptool.sh as user {{ docker_user_default }}"
   ansible.builtin.command: "loginctl enable-linger {{ docker_user_default }}"
+  changed_when: false
   when:
     - docker_cis_rule_2_1 | bool
   tags:
@@ -154,6 +155,7 @@
     DOCKER_HOST: "unix:///run/user/{{ getent_passwd[docker_user_default][1] }}/docker.sock"
   # notify:
   #   - restart docker-service
+  changed_when: false
   when:
     - docker_cis_rule_2_1 | bool
   tags:
