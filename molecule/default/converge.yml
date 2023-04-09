@@ -10,3 +10,4 @@
     docker_cis_rule_2_1: false # to run install in rootless mode
     docker_users_to_add_group:
       - name: "ubuntu"
+    docker_is_swarm_mode: true

@@ -44,6 +44,11 @@ docker_user_shell: /bin/bash
 docker_daemon_json_root: /etc/docker/daemon.json
 docker_daemon_json_rootless: ~/.config/docker/daemon.json
 
+# if swarm mode is needed, this value should be 'true'
+# will set in 'daemon.json' the value 'live-restore' to 'false'
+# by 'true' the rule 'docker_cis_rule_2_15' will be disabled
+docker_is_swarm_mode: false
+
 # ------------------------------------------------------------------------------
 
 # SECTION 1

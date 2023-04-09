@@ -103,6 +103,7 @@ docker_cis_rule_3_24: true
       docker_users_to_add_group:
         - name: "{{ ansible_user }}"
       docker_cis_rule_2_1: true # to run install in rootless mode
+      docker_is_swarm_mode: true # allow run in swarm mode
 ```
 
 ## CIS_Docker_Benchmark_v1.4.0

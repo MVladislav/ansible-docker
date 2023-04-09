@@ -39,8 +39,10 @@
 {% if docker_cis_rule_2_14 == true -%}
   "no-new-privileges": true,
 {% endif %}
-{% if docker_cis_rule_2_15 == true -%}
+{% if docker_cis_rule_2_15 == true and docker_is_swarm_mode == false -%}
   "live-restore": true,
+{% else %}
+  "live-restore": false,
 {% endif %}
 {% if docker_cis_rule_2_16 == true -%}
   "userland-proxy": false,
