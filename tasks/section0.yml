@@ -7,7 +7,7 @@
     py_extra_args: "--break-system-packages"
   when:
     - docker_install_pip is defined
-    - ansible_python_version >= "3.11"
+    - ansible_facts['python_version'] >= "3.11"
   tags:
     - docker
 
@@ -25,12 +25,11 @@
 - name: "DOCKER | 0.0.1 | INSTALL | install docker dependencies (pip)"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: "{{ py_extra_args }}"
+    extra_args: "{{ py_extra_args | default('') }}"
     executable: pip3
   loop: "{{ docker_pip_dependencies | flatten(levels=1) }}"
   when:
     - docker_pip_dependencies is defined
-    - docker_pip_dependencies is not none
   tags:
     - docker
 
@@ -119,7 +118,7 @@
 - name: "DOCKER | 0.0.4 | INSTALL | update all installed pip packages"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: "--upgrade {{ py_extra_args }}"
+    extra_args: "--upgrade {{ py_extra_args | default('') }}"
   with_items: "{{ pip_outdated.stdout_lines }}"
   when:
     - docker_install_pip is defined
@@ -129,11 +128,10 @@
 - name: "DOCKER | 0.0.5 | INSTALL | install docker packages (pip)"
   ansible.builtin.pip:
     name: "{{ item }}"
-    extra_args: "{{ py_extra_args }}"
+    extra_args: "{{ py_extra_args | default('') }}"
     executable: pip3
   loop: "{{ docker_install_pip | flatten(levels=1) }}"
   when:
     - docker_install_pip is defined
-    - docker_install_pip is not none
   tags:
     - docker
