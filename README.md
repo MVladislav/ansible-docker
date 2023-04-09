@@ -1,22 +1,29 @@
-# ansible-docker
+# CIS - Ansible-Docker
 
 [![Ansible Lint](https://github.com/MVladislav/ansible-docker/actions/workflows/ansible-lint.yml/badge.svg)](https://github.com/MVladislav/ansible-docker/actions/workflows/ansible-lint.yml)
 [![Ansible Molecule Test](https://github.com/MVladislav/ansible-docker/actions/workflows/ci.yml/badge.svg)](https://github.com/MVladislav/ansible-docker/actions/workflows/ci.yml)
 
----
-
-- [ansible-docker](#ansible-docker)
+- [CIS - Ansible-Docker](#cis---ansible-docker)
   - [Role Variables](#role-variables)
   - [Example Playbook](#example-playbook)
+  - [Example alias docker-compose \& docker-swarm](#example-alias-docker-compose--docker-swarm)
   - [CIS\_Docker\_Benchmark\_v1.4.0](#cis_docker_benchmark_v140)
   - [License](#license)
   - [Resources](#resources)
 
 ---
 
-Docker install and setup with CIS related parts.
+Install and setup Docker with CIS compliant parts.
+
+Tested with:
+
+- Ubuntu 22.04
+- Ubuntu 23.04
 
 Current implemented are most of Section 1-3 (see table below).
+
+This role was developed against a clean install of the Operating System. \
+If you are implementing to an existing system please review this role for any site specific changes that are needed.
 
 | root                                   | rootless                                       |
 | :------------------------------------- | :--------------------------------------------- |
@@ -26,6 +33,15 @@ Current implemented are most of Section 1-3 (see table below).
 
 ```yml
 docker_users_to_add_group: []
+
+docker_user_default: docker
+docker_group_default: docker
+docker_user_shell: /bin/bash
+
+# if swarm mode is needed, this value should be 'true'
+# will set in 'daemon.json' the value 'live-restore' to 'false'
+# by 'true' the rule 'docker_cis_rule_2_15' will be disabled
+docker_is_swarm_mode: false
 
 # SECTION 1
 docker_cis_section1: true
@@ -104,6 +120,14 @@ docker_cis_rule_3_24: true
         - name: "{{ ansible_user }}"
       docker_cis_rule_2_1: true # to run install in rootless mode
       docker_is_swarm_mode: true # allow run in swarm mode
+```
+
+## Example alias docker-compose & docker-swarm
+
+```sh
+alias docker='DOCKER_BUILDKIT=1 docker'
+alias docker-compose='DOCKER_BUILDKIT=1 docker compose'
+alias docker-swarm-compose='DOCKER_BUILDKIT=1 docker compose config | sed '1{/^name:/d}' | DOCKER_BUILDKIT=1 CONFIG_VERSION=1 docker stack deploy --resolve-image=never --with-registry-auth --compose-file -'
 ```
 
 ## CIS_Docker_Benchmark_v1.4.0
@@ -241,7 +265,7 @@ docker_cis_rule_3_24: true
 
 ## License
 
-GNU AFFERO GENERAL PUBLIC LICENSE
+MIT
 
 ## Resources
 
