@@ -26,7 +26,6 @@
   ansible.builtin.pip:
     name: "{{ item }}"
     extra_args: "{{ py_extra_args | default('') }}"
-    executable: pip3
   loop: "{{ docker_pip_dependencies | flatten(levels=1) }}"
   when:
     - docker_pip_dependencies is defined
@@ -129,7 +128,6 @@
   ansible.builtin.pip:
     name: "{{ item }}"
     extra_args: "{{ py_extra_args | default('') }}"
-    executable: pip3
   loop: "{{ docker_install_pip | flatten(levels=1) }}"
   when:
     - docker_install_pip is defined
