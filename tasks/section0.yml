@@ -111,6 +111,7 @@
   failed_when: pip_outdated.rc not in [0, 1]
   when:
     - docker_install_pip is defined
+    - docker_install_pip_update is defined
   tags:
     - docker
 
@@ -121,6 +122,7 @@
   with_items: "{{ pip_outdated.stdout_lines }}"
   when:
     - docker_install_pip is defined
+    - docker_install_pip_update is defined
   tags:
     - docker
 

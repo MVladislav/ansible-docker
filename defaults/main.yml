@@ -35,6 +35,7 @@ docker_install_apt:
   - docker-ce-rootless-extras
   - containerd.io
   - docker-compose-plugin
+docker_install_pip_update: false
 docker_install_pip: []
 
 docker_user_default: docker
