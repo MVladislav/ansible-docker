@@ -23,6 +23,7 @@ docker_install_gpg:
   id: 0EBFCD88
   url: https://download.docker.com/linux/ubuntu/gpg
   name: docker_release_ce.gpg
+  path: /etc/apt/trusted.gpg.d
 docker_install_repo: https://download.docker.com/linux/ubuntu
 docker_install_version: stable
 # NOTE: manual update when newer version available

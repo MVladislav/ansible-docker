@@ -33,14 +33,22 @@
     - docker
 
 # ------------------------------------------------------------------------------
+# - name: "DOCKER | 0.0.2 | INSTALL | add docker Apt signing key, will not download if present"
+#   ansible.builtin.shell: >
+#     set -o pipefail
+#     && curl -fsSL "{{ docker_install_gpg.url }}"
+#     | gpg --dearmor | tee "{{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}" >/dev/null
+#   args:
+#     executable: /bin/bash
+#   changed_when: false
+#   tags:
+#     - docker
+
 - name: "DOCKER | 0.0.2 | INSTALL | add docker Apt signing key, will not download if present"
-  ansible.builtin.shell: >
-    set -o pipefail
-    && curl -fsSL "{{ docker_install_gpg.url }}"
-    | gpg --dearmor | tee "/etc/apt/trusted.gpg.d/{{ docker_install_gpg.name }}" >/dev/null
-  args:
-    executable: /bin/bash
-  changed_when: false
+  ansible.builtin.apt_key:
+    url: "{{ docker_install_gpg.url }}"
+    keyring: "{{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}"
+    state: present
   tags:
     - docker
 
@@ -76,11 +84,11 @@
 - name: >
     DOCKER | 0.0.2 | INSTALL |
     add docker repository into sources list as:
-    deb [arch={{ os_architecture.stdout }} signed-by=/etc/apt/trusted.gpg.d/{{ docker_install_gpg.name }}]
+    deb [arch={{ os_architecture.stdout }} signed-by={{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}]
     {{ docker_install_repo }} {{ lsb_release }} {{ docker_install_version }}
   ansible.builtin.apt_repository:
     repo: >
-      deb [arch={{ os_architecture.stdout }} signed-by=/etc/apt/trusted.gpg.d/{{ docker_install_gpg.name }}]
+      deb [arch={{ os_architecture.stdout }} signed-by={{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}]
       {{ docker_install_repo }} {{ lsb_release }} {{ docker_install_version }}
     state: present
   tags:
