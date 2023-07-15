@@ -1,0 +1,27 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: "Include ansible-docker"
+      ansible.builtin.include_role:
+        name: "ansible-docker"
+  vars:
+    # rootless not possible to test under docker, because reboot is current needed
+    docker_cis_rule_2_1: false # to run install in rootless mode
+    docker_users_to_add_group:
+      - name: "ubuntu"
+    docker_is_swarm_mode: true
+    docker_install_release_skip_lunar: null
+
+    docker_package_dependencies:
+      - systemd-container
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+      - pkg-config
+
+    docker_pip_dependencies: []
+    docker_install_pip: []
