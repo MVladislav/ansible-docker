@@ -47,6 +47,7 @@
   loop: "{{ docker_users_to_add_group | flatten(levels=1) }}"
   when:
     - docker_cis_rule_1_1_2 | bool
+    - docker_users_to_add_group is defined
     - docker_users_to_add_group is not none
     - docker_users_to_add_group | length>0
   tags:

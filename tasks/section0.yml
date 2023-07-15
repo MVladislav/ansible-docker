@@ -7,18 +7,23 @@
     py_extra_args: "--break-system-packages"
   when:
     - docker_install_pip is defined
+    - docker_install_pip is not none
+    - docker_install_pip | length>0
     - ansible_facts['python_version'] >= "3.11"
   tags:
     - docker
 
 # ------------------------------------------------------------------------------
-- name: "DOCKER | 0.0.1 | INSTALL | install docker dependencies"
+- name: "DOCKER | 0.0.1 | INSTALL | install docker dependencies (apt)"
   ansible.builtin.apt:
     pkg: "{{ docker_package_dependencies }}"
     state: present
     force_apt_get: true # apt-get instead of aptitude
     update_cache: true
-  when: docker_package_dependencies is defined and (docker_package_dependencies | length>0)
+  when:
+    - docker_package_dependencies is defined
+    - docker_package_dependencies is not none
+    - docker_package_dependencies | length>0
   tags:
     - docker
 
@@ -29,22 +34,13 @@
   loop: "{{ docker_pip_dependencies | flatten(levels=1) }}"
   when:
     - docker_pip_dependencies is defined
+    - docker_pip_dependencies is not none
+    - docker_pip_dependencies | length>0
   tags:
     - docker
 
 # ------------------------------------------------------------------------------
-# - name: "DOCKER | 0.0.2 | INSTALL | add docker Apt signing key, will not download if present"
-#   ansible.builtin.shell: >
-#     set -o pipefail
-#     && curl -fsSL "{{ docker_install_gpg.url }}"
-#     | gpg --dearmor | tee "{{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}" >/dev/null
-#   args:
-#     executable: /bin/bash
-#   changed_when: false
-#   tags:
-#     - docker
-
-- name: "DOCKER | 0.0.2 | INSTALL | add docker Apt signing key, will not download if present"
+- name: "DOCKER | 0.0.2 | INSTALL | add docker apt signing key, will not download if present"
   ansible.builtin.apt_key:
     url: "{{ docker_install_gpg.url }}"
     keyring: "{{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}"
@@ -74,10 +70,13 @@
   tags:
     - docker
 
-- name: DOCKER | 0.0.2 | INSTALL | choose fallback Docker repository
+- name: "DOCKER | 0.0.2 | INSTALL | choose fallback Docker repository"
   ansible.builtin.set_fact:
     lsb_release: "{{ docker_install_release_fallback }}"
-  when: docker_repo_check.status != 200 or lsb_release == docker_install_release_skip_lunar
+  when: |
+    (docker_repo_check is defined and docker_repo_check.status is defined and docker_repo_check.status != 200)
+    or
+    (lsb_release is defined and docker_install_release_skip_lunar is defined and docker_install_release_skip_lunar is not none and lsb_release == docker_install_release_skip_lunar)
   tags:
     - docker
 
@@ -102,6 +101,7 @@
     force_apt_get: true # apt-get instead of aptitude
     update_cache: true
   when:
+    - docker_install_apt is defined
     - docker_install_apt is not none
     - docker_install_apt | length>0
   tags:
@@ -119,7 +119,9 @@
   failed_when: pip_outdated.rc not in [0, 1]
   when:
     - docker_install_pip is defined
-    - docker_install_pip_update
+    - docker_install_pip is not none
+    - docker_install_pip | length>0
+    - docker_install_pip_update | bool
   tags:
     - docker
 
@@ -130,7 +132,11 @@
   with_items: "{{ pip_outdated.stdout_lines }}"
   when:
     - docker_install_pip is defined
-    - docker_install_pip_update
+    - docker_install_pip is not none
+    - docker_install_pip | length>0
+    - docker_install_pip_update | bool
+    - pip_outdated is defined
+    - pip_outdated.stdout_lines is defined
   tags:
     - docker
 
@@ -141,5 +147,7 @@
   loop: "{{ docker_install_pip | flatten(levels=1) }}"
   when:
     - docker_install_pip is defined
+    - docker_install_pip is not none
+    - docker_install_pip | length>0
   tags:
     - docker

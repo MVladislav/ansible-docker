@@ -26,8 +26,6 @@ docker_install_gpg:
   path: /etc/apt/trusted.gpg.d
 docker_install_repo: https://download.docker.com/linux/ubuntu
 docker_install_version: stable
-# NOTE: manual update when newer version available
-# NOTE: will fallback when current install under lunar
 docker_install_release_fallback: jammy
 docker_install_release_skip_lunar: lunar
 docker_install_apt:
