@@ -26,8 +26,8 @@ docker_install_gpg:
   path: /etc/apt/trusted.gpg.d
 docker_install_repo: https://download.docker.com/linux/ubuntu
 docker_install_version: stable
-docker_install_release_fallback: jammy
-docker_install_release_skip_lunar: lunar
+docker_install_release_fallback: "{{ omit }}" # jammy
+docker_install_release_skip: "{{ omit }}" # lunar
 docker_install_apt:
   - docker-ce
   - docker-ce-cli

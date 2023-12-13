@@ -76,7 +76,7 @@
   when: |
     (docker_repo_check is defined and docker_repo_check.status is defined and docker_repo_check.status != 200)
     or
-    (lsb_release is defined and docker_install_release_skip_lunar is defined and docker_install_release_skip_lunar is not none and lsb_release == docker_install_release_skip_lunar)
+    (lsb_release is defined and docker_install_release_skip is defined and docker_install_release_skip is not none and lsb_release == docker_install_release_skip)
   tags:
     - docker
 

@@ -12,7 +12,7 @@
     docker_users_to_add_group:
       - name: "ubuntu"
     docker_is_swarm_mode: true
-    docker_install_release_skip_lunar: null
+    docker_install_release_skip: "{{ omit }}"
 
     docker_package_dependencies:
       - systemd-container
