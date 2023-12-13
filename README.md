@@ -7,7 +7,7 @@
   - [Role Variables](#role-variables)
   - [Example Playbook](#example-playbook)
   - [Example alias docker-compose \& docker-swarm](#example-alias-docker-compose--docker-swarm)
-  - [CIS\_Docker\_Benchmark\_v1.4.0](#cis_docker_benchmark_v140)
+  - [CIS_Docker_Benchmark_v1.4.0](#cis_docker_benchmark_v140)
   - [License](#license)
   - [Resources](#resources)
 
