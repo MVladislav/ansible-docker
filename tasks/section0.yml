@@ -90,6 +90,7 @@
       deb [arch={{ os_architecture.stdout }} signed-by={{ docker_install_gpg.path }}/{{ docker_install_gpg.name }}]
       {{ docker_install_repo }} {{ lsb_release }} {{ docker_install_version }}
     state: present
+    mode: "0644"
   tags:
     - docker
 
