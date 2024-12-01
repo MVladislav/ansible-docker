@@ -121,6 +121,7 @@ cis_docker_package_dependencies:
   - ca-certificates
   - curl
   - software-properties-common
+  - gnupg-agent
 cis_docker_pip_dependencies: []
 
 cis_docker_install_gpg:
