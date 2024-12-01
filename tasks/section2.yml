@@ -161,6 +161,7 @@
     - cis_docker_rule_2_9
   tags:
     - rule_2_9
+    - molecule-idempotence-notest
   block:
     - name: "SECTION2 | 2.9 | Enable user namespace support | touch /etc/subuid"
       ansible.builtin.file:
@@ -254,6 +255,9 @@
     enabled: true
   when:
     - cis_docker_rule_2_1
+  tags:
+    - rule_2
+    - molecule-idempotence-notest
 
 - name: "SECTION2 | 2.2.* | restart docker-service"
   ansible.builtin.service:
@@ -262,3 +266,6 @@
     enabled: true
   when:
     - not cis_docker_rule_2_1
+  tags:
+    - rule_2
+    - molecule-idempotence-notest
