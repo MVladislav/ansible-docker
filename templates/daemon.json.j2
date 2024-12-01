@@ -1,53 +1,59 @@
 {
 {# SECTION 2 #}
 {# ============================================================================== #}
-{% if docker_cis_rule_2_2 == true -%}
+{% if cis_docker_rule_2_2 == true -%}
   "icc": false,
+{% else %}
+  "icc": true,
 {% endif %}
-{% if docker_cis_rule_2_3 == true -%}
+{% if cis_docker_rule_2_3 == true -%}
   "log-level": "info",
 {% endif %}
-{% if docker_cis_rule_2_4 == true -%}
+{% if cis_docker_rule_2_4 == true -%}
   "iptables": true,
 {% endif %}
-{% if docker_cis_rule_2_6 == true -%}
-  "storage-driver": "overlay2",
+{% if cis_docker_rule_2_6 == true and cis_docker_storage_driver is defined -%}
+  "storage-driver": "{{ cis_docker_storage_driver }}",
 {% endif %}
-{#
-{% if docker_cis_rule_2_7 == true -%}
-  "tlsverify": true ,
-  "tlscacert": true ,
-  "tlscert": true ,
+{# {% if cis_docker_rule_2_7 == true -%}
+  "tlsverify": true,
+  "tlscacert": true,
+  "tlscert": true,
   "tlskey": true,
-{% endif %}
-#}
-{% if docker_cis_rule_2_8 == true -%}
+{% endif %} #}
+{% if cis_docker_rule_2_8 == true -%}
   "default-ulimit": [
-    "nofile=65535:65535",
-    "nproc=1024:2048",
-    "memlock=-1:-1",
-    "fsize=-1",
-    "as=-1"
+    "nofile={{ cis_docker_default_ulimit_nofile_min }}:{{ cis_docker_default_ulimit_nofile_max }}",
+    "nproc={{ cis_docker_default_ulimit_nproc_min }}:{{ cis_docker_default_ulimit_nproc_max }}",
+    "memlock={{ cis_docker_default_ulimit_memlock_min }}:{{ cis_docker_default_ulimit_memlock_max }}",
+    "fsize={{ cis_docker_default_ulimit_fsize }}",
+    "as={{ cis_docker_default_ulimit_as }}"
   ],
 {% endif %}
-{% if docker_cis_rule_2_9 == true and docker_cis_rule_2_1 == true -%}
+{% if cis_docker_rule_2_9 == true and cis_docker_rule_2_1 == true -%}
   "userns-remap": "default",
 {% endif %}
-{% if docker_cis_rule_2_13 == true -%}
-  "log-driver": "syslog",
+{% if cis_docker_rule_2_10 == true -%}
+  "cgroup-parent": "{{ cis_docker_cgroup_parent }}",
 {% endif %}
-{% if docker_cis_rule_2_14 == true -%}
+{% if cis_docker_rule_2_13 == true -%}
+  "log-driver": "{{ cis_docker_log_driver }}",
+{% endif %}
+{% if cis_docker_rule_2_14 == true -%}
   "no-new-privileges": true,
 {% endif %}
-{% if docker_cis_rule_2_15 == true and docker_is_swarm_mode == false -%}
+{% if cis_docker_rule_2_15 == true and cis_docker_is_swarm_mode == false -%}
   "live-restore": true,
 {% else %}
   "live-restore": false,
 {% endif %}
-{% if docker_cis_rule_2_16 == true -%}
+{% if cis_docker_rule_2_16 == true -%}
   "userland-proxy": false,
 {% endif %}
-{% if docker_cis_rule_2_18 == true -%}
+{% if cis_docker_rule_2_17 == true and cis_docker_seccomp_profile is defined -%}
+  "seccomp-profile": "{{ cis_docker_seccomp_profile }}",
+{% endif %}
+{% if cis_docker_rule_2_18 == true -%}
   "experimental": false
 {% endif %}
 }

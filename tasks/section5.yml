@@ -1,17 +1,61 @@
 ---
-# tasks file for roles/docker
+# tasks file for ansible-docker
 
-# # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 5.xxx | PATCH | desc"
-#   ansible.builtin.lineinfile:
-#     dest: /etc/...
-#     regexp: "^(#)?<NAME>(\\s|$)"
-#     line: "<NAME> <NAME_MORE>"
-#     state: present
-#     mode: "640"
-#     create: true
-#   when:
-#     - docker_cis_rule_5_xxx | bool
-#   tags:
-#     - docker
-#     - rule_5_xxx
+# ------------------------------------------------------------------------------
+- name: "SECTION5 | 5.1 | Ensure that, if applicable, an AppArmor Profile is enabled"
+  when:
+    - cis_docker_rule_5_1
+  tags:
+    - rule_5_1
+  block:
+    - name: "SECTION5 | 5.1 | Ensure that, if applicable, an AppArmor Profile is enabled | get info"
+      ansible.builtin.shell: >
+        set -o pipefail && docker ps --quiet --all |
+        {% raw %}
+        xargs docker inspect --format '{{ .Id }}: AppArmorProfile={{ .AppArmorProfile }}'
+        {% endraw %}
+      args:
+        executable: "{{ cis_docker_user_shell }}"
+      register: cis_docker_debug_5_apparmor_profile
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION5 | 5.1 | Ensure that, if applicable, an AppArmor Profile is enabled | print info"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          This command should return a valid AppArmor Profile for each container instance.
+          #############################################################################################
+          {{ cis_docker_debug_5_apparmor_profile.stdout_lines | join(cis_docker_print_info_join_by) }}
+          #############################################################################################
+
+# - name: "SECTION5 | 5.2 | Ensure that, if applicable, SELinux security options are set"
+# - name: "SECTION5 | 5.3 | Ensure that Linux kernel capabilities are restricted within containers"
+# - name: "SECTION5 | 5.4 | Ensure that privileged containers are not used"
+# - name: "SECTION5 | 5.5 | Ensure sensitive host system directories are not mounted on containers"
+# - name: "SECTION5 | 5.6 | Ensure sshd is not run within containers"
+# - name: "SECTION5 | 5.7 | Ensure privileged ports are not mapped within containers"
+# - name: "SECTION5 | 5.8 | Ensure that only needed ports are open on the container"
+# - name: "SECTION5 | 5.9 | Ensure that the host's network namespace is not shared"
+# - name: "SECTION5 | 5.10 | Ensure that the memory usage for containers is limited"
+# - name: "SECTION5 | 5.11 | Ensure that CPU priority is set appropriately on containers . 184"
+# - name: "SECTION5 | 5.12 | Ensure that the container's root filesystem is mounted as read only"
+# - name: "SECTION5 | 5.13 | Ensure that incoming container traffic is bound to a specific host interface"
+# - name: "SECTION5 | 5.14 | Ensure that the 'on-failure' container restart policy is set to '5'"
+# - name: "SECTION5 | 5.15 | Ensure that the host's process namespace is not shared"
+# - name: "SECTION5 | 5.16 | Ensure that the host's IPC namespace is not shared"
+# - name: "SECTION5 | 5.17 | Ensure that host devices are not directly exposed to containers 197"
+# - name: "SECTION5 | 5.18 | Ensure that the default ulimit is overwritten at runtime if needed"
+# - name: "SECTION5 | 5.19 | Ensure mount propagation mode is not set to shared"
+# - name: "SECTION5 | 5.20 | Ensure that the host's UTS namespace is not shared"
+# - name: "SECTION5 | 5.21 | Ensure the default seccomp profile is not Disabled"
+# - name: "SECTION5 | 5.22 | Ensure that docker exec commands are not used with the privileged option"
+# - name: "SECTION5 | 5.23 | Ensure that docker exec commands are not used with the user=root option"
+# - name: "SECTION5 | 5.24 | Ensure that cgroup usage is confirmed"
+# - name: "SECTION5 | 5.25 | Ensure that the container is restricted from acquiring additional privileges"
+# - name: "SECTION5 | 5.26 | Ensure that container health is checked at runtime"
+# - name: "SECTION5 | 5.27 | Ensure that Docker commands always make use of the latest version of their image"
+# - name: "SECTION5 | 5.28 | Ensure that the PIDs cgroup limit is used"
+# - name: "SECTION5 | 5.29 | Ensure that Docker's default bridge 'docker0' is not used"
+# - name: "SECTION5 | 5.30 | Ensure that the host's user namespaces are not shared"
+# - name: "SECTION5 | 5.31 | Ensure that the Docker socket is not mounted inside any containers"

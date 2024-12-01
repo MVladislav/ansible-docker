@@ -1,17 +1,26 @@
 ---
-# tasks file for roles/docker
+# tasks file for ansible-docker
 
-# # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 6.xxx | PATCH | desc"
-#   ansible.builtin.lineinfile:
-#     dest: /etc/...
-#     regexp: "^(#)?<NAME>(\\s|$)"
-#     line: "<NAME> <NAME_MORE>"
-#     state: present
-#     mode: "640"
-#     create: true
-#   when:
-#     - docker_cis_rule_6_xxx | bool
-#   tags:
-#     - docker
-#     - rule_6_xxx
+# ------------------------------------------------------------------------------
+
+- name: "SECTION6 | 6.1 | Ensure that container sprawl is avoided"
+  ansible.builtin.shell: docker system prune -a
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_6_1
+  tags:
+    - rule_6_1
+
+- name: "SECTION6 | 6.2 | Ensure that container sprawl is avoided"
+  ansible.builtin.shell: docker container prune
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_6_2
+  tags:
+    - rule_6_2

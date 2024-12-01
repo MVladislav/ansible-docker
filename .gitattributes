@@ -1,3 +1,8 @@
-# https://docs.github.com/en/repositories/working-with-files/managing-files/customizing-how-changed-files-appear-on-github
-# Default behavior - Auto detect text files and perform LF normalization
+# Auto detect text files and perform LF normalization
 * text=auto
+
+# adding github settings to show correct language
+*.yml linguist-detectable=true
+*.yaml linguist-detectable=true
+*.j2 linguist-detectable=true
+*.md linguist-documentation

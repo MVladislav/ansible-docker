@@ -4,15 +4,17 @@ galaxy_info:
   description: Ansible role for install & setup docker with CIS baseline
   company: none
   license: MIT
-  min_ansible_version: "2.9"
-  role_name: docker
+  min_ansible_version: "2.16"
+  role_name: cis_docker
   namespace: mvladislav
 
   platforms:
     - name: Ubuntu
 
   galaxy_tags:
-    - docker
     - cis
+    - security
+    - hardening
+    - docker
 
 dependencies: []

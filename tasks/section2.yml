@@ -1,199 +1,186 @@
 ---
-# tasks file for roles/docker
+# tasks file for ansible-docker
 
 # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 2.xxx | PATCH | desc"
-#   ansible.builtin.lineinfile:
-#     dest: /etc/...
-#     regexp: "^(#)?<NAME>(\\s|$)"
-#     line: "<NAME> <NAME_MORE>"
-#     state: present
-#     mode: "640"
-#     create: true
-#   when:
-#     - docker_cis_rule_2_xxx | bool
-#   tags:
-#     - docker
-#     - rule_2_xxx
-#
-# ------------------------------------------------------------------------------
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | install dependencies"
-  become: true
-  ansible.builtin.apt:
-    pkg:
-      - uidmap
-      - dbus-user-session
-    state: present
-    force_apt_get: true # apt-get instead of aptitude
-    update_cache: true
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
 
-- name: >
-    AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | expose privileged ports (< 1024) - CAP_NET_BIND_SERVICE on rootlesskit
-  community.general.capabilities:
-    path: /usr/bin/rootlesskit
-    capability: cap_net_bind_service=ep
-    state: present
+- name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible"
   when:
-    - docker_cis_rule_2_1 | bool
+    - cis_docker_rule_2_1
   tags:
-    - docker
     - rule_2_1
-
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | add {{ docker_user_default }} to subuid"
-  ansible.builtin.lineinfile:
-    dest: /etc/subuid
-    regexp: "^(#)?{{ docker_user_default }}(\\s|$)"
-    line: "{{ docker_user_default }}:100000:65536"
-    state: present
-    mode: "644"
-    create: true
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | add {{ docker_user_default }} to subgid"
-  ansible.builtin.lineinfile:
-    dest: /etc/subgid
-    regexp: "^(#)?{{ docker_user_default }}(\\s|$)"
-    line: "{{ docker_user_default }}:100000:65536"
-    state: present
-    mode: "644"
-    create: true
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-# .......................................
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | stop docker.socket root service"
-  ansible.builtin.service:
-    name: docker.socket
-    state: stopped
-    enabled: false
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | stop docker.service root service"
-  ansible.builtin.service:
-    name: docker.service
-    state: stopped
-    enabled: false
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-# .......................................
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | run dockerd-rootless-setuptool.sh as user {{ docker_user_default }}"
-  ansible.builtin.command: "loginctl enable-linger {{ docker_user_default }}"
-  changed_when: false
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | get user uid for {{ docker_user_default }}"
-  ansible.builtin.getent:
-    database: passwd
-    key: "{{ docker_user_default }}"
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | set env XDG_RUNTIME_DIR + DOCKER_HOST"
-  become: true
-  become_user: "{{ docker_user_default }}"
-  ansible.builtin.lineinfile:
-    dest: ~/.bashrc
-    regexp: "^(#)?{{ item.key }}(\\s|$)"
-    line: "{{ item.key }}={{ item.value }}"
-    state: present
-    mode: "644"
-    create: true
-  with_items:
-    - key: export XDG_RUNTIME_DIR
-      value: "/run/user/{{ getent_passwd[docker_user_default][1] }}"
-    - key: export DOCKER_HOST
-      value: "unix:///run/user/{{ getent_passwd[docker_user_default][1] }}/docker.sock"
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-# .......................................
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | reboot system after stop docker"
-  ansible.builtin.reboot:
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-# .......................................
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | run dockerd-rootless-setuptool.sh as user {{ docker_user_default }}"
-  become: true
-  become_user: "{{ docker_user_default }}"
-  ansible.builtin.command: /usr/bin/dockerd-rootless-setuptool.sh install
-  environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ getent_passwd[docker_user_default][1] }}"
-    DOCKER_HOST: "unix:///run/user/{{ getent_passwd[docker_user_default][1] }}/docker.sock"
-  # notify:
-  #   - restart docker-service
-  changed_when: false
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-# .......................................
-- name: "AUTOMATED | 2.1 | PATCH | Run the Docker daemon as a non-root user, if possible | set env DOCKER_HOST global"
-  ansible.builtin.lineinfile:
-    dest: /etc/environment
-    regexp: "^(#)?DOCKER_HOST(\\s|$)"
-    line: "DOCKER_HOST=unix:///run/user/{{ getent_passwd[docker_user_default][1] }}/docker.sock"
-    state: present
-    mode: "644"
-    create: true
-  when:
-    - docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_1
-
-# ------------------------------------------------------------------------------
-- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | PATCH | set multiple flag in daemon.json"
-  become: true
-  become_user: "{{ docker_user_default }}"
-  ansible.builtin.template:
-    src: daemon.json.j2
-    dest: "{{ docker_daemon_json_rootless }}"
-    owner: "{{ docker_user_default }}"
-    group: "{{ docker_user_default }}"
-    mode: "640"
   notify:
-    - restart docker-service
+    - Restart docker-service
+  block:
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | install dependencies"
+      ansible.builtin.apt:
+        name:
+          - uidmap
+          - dbus-user-session
+          - docker-ce-rootless-extras
+        state: present
+        force_apt_get: true # apt-get instead of aptitude
+        update_cache: true
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | expose privileged ports (< 1024) - CAP_NET_BIND_SERVICE on rootlesskit"
+      community.general.capabilities:
+        path: /usr/bin/rootlesskit
+        capability: cap_net_bind_service=ep
+        state: present
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | add to subuid '{{ cis_docker_user_default }}'"
+      ansible.builtin.lineinfile:
+        dest: /etc/subuid
+        regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
+        line: "{{ cis_docker_user_default }}:100000:65536"
+        state: present
+        mode: "0644"
+        create: true
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | add to subgid '{{ cis_docker_user_default }}'"
+      ansible.builtin.lineinfile:
+        dest: /etc/subgid
+        regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
+        line: "{{ cis_docker_user_default }}:100000:65536"
+        state: present
+        mode: "0644"
+        create: true
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | stop docker.socket root service"
+      ansible.builtin.service:
+        name: docker.socket
+        state: stopped
+        enabled: false
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | stop docker.service root service"
+      ansible.builtin.service:
+        name: docker.service
+        state: stopped
+        enabled: false
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | run dockerd-rootless-setuptool.sh as user {{ cis_docker_user_default }}"
+      ansible.builtin.command: "loginctl enable-linger {{ cis_docker_user_default }}"
+      changed_when: false
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | get user uid for {{ cis_docker_user_default }}"
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ cis_docker_user_default }}"
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | set env XDG_RUNTIME_DIR + DOCKER_HOST"
+      become: true
+      become_user: "{{ cis_docker_user_default }}"
+      ansible.builtin.lineinfile:
+        dest: ~/.bashrc
+        regexp: "{{ cis_docker_regex_base_search }}{{ item.key }}{{ cis_docker_regex_base_search_end }}"
+        line: "{{ item.key }}={{ item.value }}"
+        state: present
+        mode: "0644"
+        create: true
+      with_items:
+        - key: export XDG_RUNTIME_DIR
+          value: "/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+        - key: export DOCKER_HOST
+          value: "unix:///run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | reboot system after stop docker"
+      ansible.builtin.reboot:
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | run dockerd-rootless-setuptool.sh as user {{ cis_docker_user_default }}"
+      become: true
+      become_user: "{{ cis_docker_user_default }}"
+      ansible.builtin.command: /usr/bin/dockerd-rootless-setuptool.sh install
+      environment:
+        XDG_RUNTIME_DIR: "/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+        DOCKER_HOST: "unix:///run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+      changed_when: false
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | set env DOCKER_HOST global"
+      ansible.builtin.lineinfile:
+        dest: /etc/environment
+        regexp: "{{ cis_docker_regex_base_search }}DOCKER_HOST{{ cis_docker_regex_base_search_end }}"
+        line: "DOCKER_HOST=unix:///run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        state: present
+        mode: "0644"
+        create: true
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.5 | Ensure insecure registries are not used"
   when:
-    - docker_cis_rule_2_1 | bool
-  register: docker_daemon_changed
+    - cis_docker_rule_2_5
   tags:
-    - docker
+    - rule_2_5
+  block:
+    - name: "SECTION2 | 2.5 | Ensure insecure registries are not used | get info"
+      ansible.builtin.shell: >
+        {% raw %}
+        docker info --format 'Insecure Registries: {{.RegistryConfig.InsecureRegistryCIDRs}}'
+        {% endraw %}
+      args:
+        executable: "{{ cis_docker_user_shell }}"
+      register: cis_docker_2_5_insecure_registries
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION2 | 2.5 | Ensure insecure registries are not used | print info"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          Ensure insecure registries are not used
+          #############################################################################################
+          {{ cis_docker_2_5_insecure_registries.stdout_lines | join(cis_docker_print_info_join_by) }}
+          #############################################################################################
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.6 | Ensure aufs storage driver is not used"
+  when:
+    - cis_docker_rule_2_6
+  tags:
+    - rule_2_6
+  block:
+    - name: "SECTION2 | 2.6 | Ensure aufs storage driver is not used | get info"
+      ansible.builtin.shell: >
+        {% raw %}
+        docker info --format 'Storage Driver: {{ .Driver }}'
+        {% endraw %}
+      args:
+        executable: "{{ cis_docker_user_shell }}"
+      register: cis_docker_2_6_storage_driver_used
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION2 | 2.6 | Ensure aufs storage driver is not used | print info"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          Ensure aufs storage driver is not used.
+          Do not explicitly use aufs as storage driver.
+          #############################################################################################
+          {{ cis_docker_2_6_storage_driver_used.stdout_lines | join(cis_docker_print_info_join_by) }}
+          #############################################################################################
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.9 | Enable user namespace support"
+  when:
+    - cis_docker_rule_2_9
+  tags:
+    - rule_2_9
+  block:
+    - name: "SECTION2 | 2.9 | Enable user namespace support | touch /etc/subuid"
+      ansible.builtin.file:
+        path: /etc/subuid
+        state: touch
+        mode: "0644"
+    - name: "SECTION2 | 2.9 | Enable user namespace support | touch /etc/subgid"
+      ansible.builtin.file:
+        path: /etc/subgid
+        state: touch
+        mode: "0644"
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.2-2.18 | daemon.json (ROOTLESS)"
+  become: true
+  become_user: "{{ cis_docker_user_default }}"
+  when:
+    - cis_docker_rule_2_1
+  tags:
     - rule_2_2
     - rule_2_3
     - rule_2_4
@@ -206,45 +193,28 @@
     - rule_2_15
     - rule_2_16
     - rule_2_18
-
-- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | PATCH | check and create folder for daemon.json"
-  become: true
-  ansible.builtin.file:
-    path: "/etc/docker"
-    state: directory
-    mode: "750"
-  when:
-    - not docker_cis_rule_2_1 | bool
-  tags:
-    - docker
-    - rule_2_2
-    - rule_2_3
-    - rule_2_4
-    - rule_2_6
-    - rule_2_7
-    - rule_2_8
-    - rule_2_9
-    - rule_2_13
-    - rule_2_14
-    - rule_2_15
-    - rule_2_16
-    - rule_2_18
-
-- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | PATCH | set multiple flag in daemon.json"
-  become: true
-  ansible.builtin.template:
-    src: daemon.json.j2
-    dest: "{{ docker_daemon_json_root }}"
-    owner: root
-    group: root
-    mode: "640"
   notify:
-    - restart docker-service
+    - Restart docker-service
+  block:
+    - name: "SECTION2 | 2.2-2.18 | daemon.json | create folder (ROOTLESS)"
+      ansible.builtin.file:
+        path: "{{ cis_docker_daemon_json_rootless }}"
+        state: directory
+        mode: "0750"
+    - name: "SECTION2 | 2.2-2.18 | daemon.json | set conf's in file (ROOTLESS)"
+      ansible.builtin.template:
+        src: daemon.json.j2
+        dest: "{{ cis_docker_daemon_json_rootless }}/daemon.json"
+        owner: "{{ cis_docker_user_default }}"
+        group: "{{ cis_docker_user_default }}"
+        mode: "0640"
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.2-2.18 | daemon.json"
   when:
-    - not docker_cis_rule_2_1 | bool
-  register: docker_daemon_changed
+    - not cis_docker_rule_2_1
   tags:
-    - docker
     - rule_2_2
     - rule_2_3
     - rule_2_4
@@ -257,26 +227,18 @@
     - rule_2_15
     - rule_2_16
     - rule_2_18
-
-- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | restart docker-service"
-  become: true
-  become_user: "{{ docker_user_default }}"
-  ansible.builtin.service:
-    name: docker.service
-    state: restarted
-    enabled: true
-  when:
-    - docker_cis_rule_2_1 | bool
-    - docker_daemon_changed is defined
-    - docker_daemon_changed.changed | bool
-
-- name: "AUTOMATED | 2.2-3.9, 2.13-2.16, 2.18 | restart docker-service"
-  become: true
-  ansible.builtin.service:
-    name: docker.service
-    state: restarted
-    enabled: true
-  when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_daemon_changed is defined
-    - docker_daemon_changed.changed | bool
+  notify:
+    - Restart docker-service
+  block:
+    - name: "SECTION2 | 2.2-2.18 | daemon.json | create folder"
+      ansible.builtin.file:
+        path: "{{ cis_docker_daemon_json_root }}"
+        state: directory
+        mode: "0750"
+    - name: "SECTION2 | 2.2-2.18 | daemon.json | set conf's in file"
+      ansible.builtin.template:
+        src: daemon.json.j2
+        dest: "{{ cis_docker_daemon_json_root }}/daemon.json"
+        owner: root
+        group: root
+        mode: "0640"

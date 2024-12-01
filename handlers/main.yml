@@ -1,32 +1,36 @@
 ---
-# handlers file for roles/docker
+# handlers file for ansible-docker
 
-- name: "DOCKER | service | restart docker-service"
+# ------------------------------------------------------------------------------
+
+- name: "HANDLER | 2.2.* | restart docker-service as rootless"
   become: true
-  become_user: "{{ docker_user_default }}"
+  become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.service:
     name: docker.service
     state: restarted
     enabled: true
     # scope: user
-  listen: restart docker-service
+  listen: Restart docker-service
   when:
-    - docker_cis_rule_2_1 | bool
+    - cis_docker_rule_2_1
 
-- name: "DOCKER | service | restart docker-service"
+- name: "HANDLER | 2.2.* | restart docker-service as root"
   become: true
   ansible.builtin.service:
     name: docker.service
     state: restarted
     enabled: true
-  listen: restart docker-service
+  listen: Restart docker-service
   when:
-    - not docker_cis_rule_2_1 | bool
+    - not cis_docker_rule_2_1
 
-- name: "DOCKER | service | restart auditd-service"
+# ------------------------------------------------------------------------------
+
+- name: "HANDLER | 1.1.18 | restart auditd-service"
   become: true
   ansible.builtin.service:
     name: auditd
     state: restarted
     enabled: true
-  listen: restart auditd-service
+  listen: Restart auditd-service

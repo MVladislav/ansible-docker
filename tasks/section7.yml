@@ -1,17 +1,138 @@
 ---
-# tasks file for roles/docker
+# tasks file for ansible-docker
 
 # # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 7.xxx | PATCH | desc"
-#   ansible.builtin.lineinfile:
-#     dest: /etc/...
-#     regexp: "^(#)?<NAME>(\\s|$)"
-#     line: "<NAME> <NAME_MORE>"
-#     state: present
-#     mode: "640"
-#     create: true
-#   when:
-#     - docker_cis_rule_7_xxx | bool
-#   tags:
-#     - docker
-#     - rule_7_xxx
+
+- name: "SECTION7 | 7.1 | Ensure swarm mode is not Enabled, if not needed"
+  ansible.builtin.shell: docker swarm leave
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_7_1
+    - not cis_docker_is_swarm_mode
+  tags:
+    - rule_7_1
+
+# - name: "SECTION7 | 7.2 | Ensure that the minimum number of manager nodes have been created in a swarm"
+
+- name: "SECTION7 | 7.3 | Ensure that swarm services are bound to a specific host interface"
+  when:
+    - cis_docker_rule_7_3
+  tags:
+    - rule_7_3
+  block:
+    - name: "SECTION7 | 7.3 | Ensure that swarm services are bound to a specific host interface | get info"
+      ansible.builtin.shell: >
+        set -o pipefail && ss -lp | grep -iE ':2377|:7946'
+      args:
+        executable: "{{ cis_docker_user_shell }}"
+      register: cis_docker_debug_7_swarm_specific_host_interface
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION7 | 7.3 | Ensure that swarm services are bound to a specific host interface | print info"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          Confirm that it is only listening on specific interfaces.
+          Resolving this issues requires re-initialization of the swarm,
+          specifying a specific interface for the --listen-addr parameter.
+          #############################################################################################
+          {{ cis_docker_debug_7_swarm_specific_host_interface.stdout_lines | join(cis_docker_print_info_join_by) }}
+          #############################################################################################
+
+- name: "SECTION7 | 7.4 | Ensure that all Docker swarm overlay networks are encrypted"
+  when:
+    - cis_docker_rule_7_4
+  tags:
+    - rule_7_4
+  block:
+    - name: "SECTION7 | 7.4 | Ensure that all Docker swarm overlay networks are encrypted | get info"
+      ansible.builtin.shell: >
+        set -o pipefail && ss -lp | docker network ls --filter driver=overlay --quiet |
+        {% raw %}
+        xargs docker network inspect --format '{{.Name}} {{ .Options }}'
+        {% endraw %}
+      args:
+        executable: "{{ cis_docker_user_shell }}"
+      register: cis_docker_debug_7_swarm_overlay_networks_encrypted
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION7 | 7.4 | Ensure that all Docker swarm overlay networks are encrypted | print info"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          Ensure that each overlay network has been encrypted.
+          You should create overlay networks the with --opt encrypted flag.
+          #############################################################################################
+          {{ cis_docker_debug_7_swarm_overlay_networks_encrypted.stdout_lines | join(cis_docker_print_info_join_by) }}
+          #############################################################################################
+
+# - name: "SECTION7 | 7.5 | Ensure that Docker's secret management commands are used for managing secrets in a swarm cluster"
+
+- name: "SECTION7 | 7.6 | Ensure that swarm manager is run in auto-lock mode"
+  ansible.builtin.shell: docker swarm update --autolock
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_7_6
+    - cis_docker_is_swarm_mode
+  tags:
+    - rule_7_6
+
+- name: "SECTION7 | 7.7 | Ensure that the swarm manager auto-lock key is rotated periodically"
+  ansible.builtin.shell: docker swarm unlock-key --rotate
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_7_7
+    - cis_docker_is_swarm_mode
+  tags:
+    - rule_7_7
+
+- name: "SECTION7 | 7.8 | Ensure that node certificates are rotated as appropriate"
+  ansible.builtin.shell: >
+    docker swarm update --cert-expiry {{ cis_docker_swarm_cert_expiry }}
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_7_8
+    - cis_docker_is_swarm_mode
+  tags:
+    - rule_7_8
+
+- name: "SECTION7 | 7.9 | Ensure that CA certificates are rotated as appropriate"
+  ansible.builtin.shell: docker swarm ca --rotate
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_7_9
+    - cis_docker_is_swarm_mode
+  tags:
+    - rule_7_9
+
+- name: "SECTION7 | 7.10 | Ensure that management plane traffic is separated from data plane traffic"
+  ansible.builtin.shell: >
+    docker swarm init --advertise-addr={{ cis_docker_swarm_advertise_addr }} --data-path-addr={{ cis_docker_swarm_data_path_addr }}
+  args:
+    executable: "{{ cis_docker_user_shell }}"
+  changed_when: false
+  failed_when: false
+  when:
+    - cis_docker_rule_7_10
+    - cis_docker_is_swarm_mode
+    - cis_docker_swarm_advertise_addr is defined
+    - cis_docker_swarm_data_path_addr is defined
+  tags:
+    - rule_7_10

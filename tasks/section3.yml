@@ -1,384 +1,366 @@
 ---
-# tasks file for roles/docker
-
-# # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 3.xxx | PATCH | desc"
-#   ansible.builtin.lineinfile:
-#     dest: /etc/...
-#     regexp: "^(#)?<NAME>(\\s|$)"
-#     line: "<NAME> <NAME_MORE>"
-#     state: present
-#     mode: "640"
-#     create: true
-#   when:
-#     - docker_cis_rule_3_xxx | bool
-#   tags:
-#     - docker
-#     - rule_3_xxx
+# tasks file for ansible-docker
 
 # ------------------------------------------------------------------------------
-- name: "ROOTLESS | 3.1 | PATCH | Ensure that the docker.service file ownership is set to {{ docker_user_default }}:{{ docker_user_default }}"
+
+- name: "SECTION3 | 3.1 | Ensure that the docker.service file ownership is set to docker user (ROOTLESS)"
+  become: true
+  become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.file:
-    path: "/home/{{ docker_user_default }}/.config/systemd/user/docker.service"
-    owner: "{{ docker_user_default }}"
-    group: "{{ docker_user_default }}"
+    path: "~/.config/systemd/user/docker.service"
+    owner: "{{ cis_docker_user_default }}"
+    group: "{{ cis_docker_group_default }}"
     state: file
   when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_1 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_1
   tags:
-    - docker
     - rule_3_1
 
-- name: "AUTOMATED | 3.1 | PATCH | Ensure that the docker.service file ownership is set to root:root"
+- name: "SECTION3 | 3.1 | Ensure that the docker.service file ownership is set to root:root"
   ansible.builtin.file:
     path: "/usr/lib/systemd/system/docker.service"
     owner: "root"
     group: "root"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_1 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_1
   tags:
-    - docker
     - rule_3_1
 
 # ------------------------------------------------------------------------------
-- name: "ROOTLESS | 3.2 | PATCH | Ensure that docker.service file permissions are appropriately set"
+
+- name: "SECTION3 | 3.2 | Ensure that docker.service file permissions are appropriately set (ROOTLESS)"
+  become: true
+  become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.file:
-    path: "/home/{{ docker_user_default }}/.config/systemd/user/docker.service"
-    mode: "644"
+    path: "~/.config/systemd/user/docker.service"
+    mode: "0640"
     state: file
   when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_2 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_2
   tags:
-    - docker
     - rule_3_2
 
-- name: "AUTOMATED | 3.2 | PATCH | Ensure that docker.service file permissions are appropriately set"
+- name: "SECTION3 | 3.2 | Ensure that docker.service file permissions are appropriately set"
   ansible.builtin.file:
     path: "/usr/lib/systemd/system/docker.service"
-    mode: "644"
+    mode: "0644"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_2 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_2
   tags:
-    - docker
     - rule_3_2
 
 # ------------------------------------------------------------------------------
-# - name: "ROOTLESS | 3.3 | PATCH | Ensure that docker.socket file ownership is set {{ docker_user_default }}:{{ docker_user_default }}"
+
+# - name: "SECTION3 | 3.3 | Ensure that docker.socket file ownership is set docker user (ROOTLESS)"
+#   become: true
+#   become_user: "{{ cis_docker_user_default }}"
 #   ansible.builtin.file:
-#     path: "/home/{{ docker_user_default }}/.config/systemd/user/docker.service"
-#     owner: "{{ docker_user_default }}"
-#     group: "{{ docker_user_default }}"
+#     path: "~/.config/systemd/user/docker.socket"
+#     owner: "{{ cis_docker_user_default }}"
+#     group: "{{ cis_docker_group_default }}"
 #     state: file
 #   when:
-#     - docker_cis_rule_2_1 | bool
-#     - docker_cis_rule_3_3 | bool
+#     - cis_docker_rule_2_1
+#     - cis_docker_rule_3_3
 #   tags:
-#     - docker
 #     - rule_3_3
 
-- name: "AUTOMATED | 3.3 | PATCH | Ensure that docker.socket file ownership is set to root:root"
+- name: "SECTION3 | 3.3 | Ensure that docker.socket file ownership is set to root:root"
   ansible.builtin.file:
     path: "/usr/lib/systemd/system/docker.socket"
     owner: "root"
     group: "root"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_3 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_3
   tags:
-    - docker
     - rule_3_3
 
 # ------------------------------------------------------------------------------
-# - name: "ROOTLESS | 3.4 | PATCH | Ensure that docker.socket file permissions are set to 644 or more restrictive"
+
+# - name: "SECTION3 | 3.4 | Ensure that docker.socket file permissions are set to 644 or more restrictive (ROOTLESS)"
+#   become: true
+#   become_user: "{{ cis_docker_user_default }}"
 #   ansible.builtin.file:
-#     path: "/home/{{ docker_user_default }}/.config/systemd/user/docker.service"
-#     mode: "640"
+#     path: "~/.config/systemd/user/docker.socket"
+#     mode: "0640"
 #     state: file
 #   when:
-#     - docker_cis_rule_2_1 | bool
-#     - docker_cis_rule_3_4 | bool
+#     - cis_docker_rule_2_1
+#     - cis_docker_rule_3_4
 #   tags:
-#     - docker
 #     - rule_3_4
 
-- name: "AUTOMATED | 3.4 | PATCH | Ensure that docker.socket file permissions are set to 644 or more restrictive"
+- name: "SECTION3 | 3.4 | Ensure that docker.socket file permissions are set to 644 or more restrictive"
   ansible.builtin.file:
     path: "/usr/lib/systemd/system/docker.socket"
-    mode: "640"
+    mode: "0644"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_4 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_4
   tags:
-    - docker
     - rule_3_4
 
 # ------------------------------------------------------------------------------
-- name: "AUTOMATED | 3.5 | PATCH | Ensure that the /etc/docker directory ownership is set to root:root"
+
+- name: "SECTION3 | 3.5 | Ensure that the nonroot docker directory ownership is set to docker user (ROOTLESS)"
+  become: true
+  become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.file:
-    path: "/etc/docker"
-    owner: "root"
-    group: "root"
-    mode: "750"
+    path: "{{ cis_docker_daemon_json_rootless }}"
+    owner: "{{ cis_docker_user_default }}"
+    group: "{{ cis_docker_group_default }}"
+    mode: "0750"
     state: directory
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_5 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_5
   tags:
-    - docker
     - rule_3_5
 
-- name: "AUTOMATED | 3.6 | PATCH | Ensure that /etc/docker directory permissions are set to 755 or more restrictively"
+- name: "SECTION3 | 3.5 | Ensure that the /etc/docker directory ownership is set to root:root"
   ansible.builtin.file:
-    path: "/etc/docker"
-    mode: "750"
+    path: "{{ cis_docker_daemon_json_root }}"
+    owner: "root"
+    group: "root"
+    mode: "0750"
     state: directory
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_6 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_5
   tags:
-    - docker
+    - rule_3_5
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION3 | 3.6 | Ensure that nonroot docker directory permissions are set to 755 or more restrictively"
+  become: true
+  become_user: "{{ cis_docker_user_default }}"
+  ansible.builtin.file:
+    path: "{{ cis_docker_daemon_json_rootless }}"
+    mode: "0750"
+    state: directory
+  when:
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_6
+  tags:
     - rule_3_6
 
-# TODO: # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 3.7 | PATCH | Ensure that registry certificate file ownership is set to root:root"
-#   ansible.builtin.file:
-#     path: "/etc/docker/certs.d/**/*"
-#     owner: "root"
-#     group: "root"
-#     state: file
-#   when:
-#     - not docker_cis_rule_2_1 | bool
-#     - docker_cis_rule_3_7 | bool
-#   tags:
-#     - docker
-#     - rule_3_7
-
-# - name: "AUTOMATED | 3.8 | PATCH | Ensure that registry certificate file permissions are set to 444 or more restrictively"
-#   ansible.builtin.file:
-#     path: "/etc/docker/certs.d/**/*"
-#     mode: "440"
-#     state: file
-#   when:
-#     - not docker_cis_rule_2_1 | bool
-#     - docker_cis_rule_3_8 | bool
-#   tags:
-#     - docker
-#     - rule_3_8
-
-# ------------------------------------------------------------------------------
-- name: "ROOTLESS | 3.15 | PATCH | Ensure that the Docker socket file ownership is set to docker:docker"
+- name: "SECTION3 | 3.6 | Ensure that /etc/docker directory permissions are set to 755 or more restrictively"
   ansible.builtin.file:
-    path: "/var/run/user/{{ getent_passwd[docker_user_default][1] }}/docker.sock"
-    owner: "{{ docker_group_default }}"
-    group: "{{ docker_group_default }}"
-    state: file
-  when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_15 | bool
-  tags:
-    - docker
-    - rule_3_15
-
-- name: "ROOTLESS | 3.15.+ | PATCH | Ensure that the Docker socket directory ownership is set to docker:docker"
-  ansible.builtin.file:
-    path: "/var/run/user/{{ getent_passwd[docker_user_default][1] }}"
-    owner: "{{ docker_group_default }}"
-    group: "{{ docker_group_default }}"
-    mode: "770"
+    path: "{{ cis_docker_daemon_json_root }}"
+    mode: "0750"
     state: directory
   when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_15 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_6
   tags:
-    - docker
-    - rule_3_15
+    - rule_3_6
 
-- name: "AUTOMATED | 3.15 | PATCH | Ensure that the Docker socket file ownership is set to root:docker"
+# ------------------------------------------------------------------------------
+
+# - name: "SECTION3 | 3.7 | Ensure that registry certificate file ownership is set to root:root"
+# - name: "SECTION3 | 3.8 | Ensure that registry certificate file permissions are set to 444 or more restrictively"
+# - name: "SECTION3 | 3.9 | Ensure that TLS CA certificate file ownership is set to root:root"
+# - name: "SECTION3 | 3.10 | Ensure that TLS CA certificate file permissions are set to 444 or more restrictively"
+# - name: "SECTION3 | 3.11 | Ensure that Docker server certificate file ownership is set to root:root"
+# - name: "SECTION3 | 3.12 | Ensure that the Docker server certificate file permissions are set to 444 or more restrictively"
+# - name: "SECTION3 | 3.13 | Ensure that the Docker server certificate key file ownership is set to root:root"
+# - name: "SECTION3 | 3.14 | Ensure that the Docker server certificate key file permissions are set to 400"
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION3 | 3.15 | Ensure that the Docker socket file ownership is set to docker user (ROOTLESS)"
+  when:
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_15
+  tags:
+    - rule_3_15
+  block:
+    - name: "SECTION3 | 3.15 | Ensure that the Docker socket file ownership is set to docker user"
+      ansible.builtin.file:
+        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        owner: "{{ cis_docker_user_default }}"
+        group: "{{ cis_docker_group_default }}"
+        state: file
+    - name: "SECTION3 | 3.15 | Ensure that the Docker socket directory ownership is set to docker user"
+      ansible.builtin.file:
+        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+        owner: "{{ cis_docker_user_default }}"
+        group: "{{ cis_docker_group_default }}"
+        mode: "0770"
+        state: directory
+
+- name: "SECTION3 | 3.15 | Ensure that the Docker socket file ownership is set to root:docker"
   ansible.builtin.file:
     path: "/var/run/docker.sock"
     owner: "root"
-    group: "{{ docker_group_default }}"
+    group: "{{ cis_docker_group_default }}"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_15 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_15
   tags:
-    - docker
     - rule_3_15
 
-- name: "ROOTLESS | 3.16 | PATCH | Ensure that the Docker socket file permissions are set to 660 or more restrictively"
-  ansible.builtin.file:
-    path: "/var/run/user/{{ getent_passwd[docker_user_default][1] }}/docker.sock"
-    mode: "660"
-    state: file
-  when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_16 | bool
-  tags:
-    - docker
-    - rule_3_16
+# ------------------------------------------------------------------------------
 
-- name: "ROOTLESS | 3.16.+ | PATCH | Ensure that the Docker socket directory permissions are set to 770 or more restrictively"
-  ansible.builtin.file:
-    path: "/var/run/user/{{ getent_passwd[docker_user_default][1] }}"
-    mode: "770"
-    state: directory
+- name: "SECTION3 | 3.16 | Ensure that the Docker socket file permissions are set to 660 or more restrictively (ROOTLESS)"
   when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_16 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_16
   tags:
-    - docker
     - rule_3_16
+  block:
+    - name: "SECTION3 | 3.16 | Ensure that the Docker socket file permissions are set to 660 or more restrictively"
+      ansible.builtin.file:
+        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        mode: "0660"
+        state: file
+    - name: "SECTION3 | 3.16 | Ensure that the Docker socket directory permissions are set to 770 or more restrictively"
+      ansible.builtin.file:
+        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+        mode: "0770"
+        state: directory
 
-- name: "AUTOMATED | 3.16 | PATCH | Ensure that the Docker socket file permissions are set to 660 or more restrictively"
+- name: "SECTION3 | 3.16 | Ensure that the Docker socket file permissions are set to 660 or more restrictively"
   ansible.builtin.file:
     path: "/var/run/docker.sock"
-    mode: "660"
+    mode: "0660"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_16 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_16
   tags:
-    - docker
     - rule_3_16
 
 # ------------------------------------------------------------------------------
-- name: "ROOTLESS | 3.17 | PATCH | Ensure that the daemon.json file ownership is set to {{ docker_group_default }}:{{ docker_group_default }}"
+
+- name: "SECTION3 | 3.17 | Ensure that the daemon.json file ownership is set (ROOTLESS)"
   become: true
-  become_user: "{{ docker_user_default }}"
+  become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.file:
-    path: "{{ docker_daemon_json_rootless }}"
-    owner: "{{ docker_group_default }}"
-    group: "{{ docker_group_default }}"
+    path: "{{ cis_docker_daemon_json_rootless }}/daemon.json"
+    owner: "{{ cis_docker_user_default }}"
+    group: "{{ cis_docker_group_default }}"
     state: file
   when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_17 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_17
   tags:
-    - docker
     - rule_3_17
 
-- name: "AUTOMATED | 3.17 | PATCH | Ensure that the daemon.json file ownership is set to root:root"
+- name: "SECTION3 | 3.17 | Ensure that the daemon.json file ownership is set to root:root"
   ansible.builtin.file:
-    path: "{{ docker_daemon_json_root }}"
+    path: "{{ cis_docker_daemon_json_root }}/daemon.json"
     owner: "root"
     group: "root"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_17 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_17
   tags:
-    - docker
     - rule_3_17
 
-- name: "ROOTLESS | 3.18 | PATCH | Ensure that daemon.json file permissions are set to 644 or more restrictive"
+# ------------------------------------------------------------------------------
+
+- name: "SECTION3 | 3.18 | Ensure that daemon.json file permissions are set to 644 or more restrictive (ROOTLESS)"
   become: true
-  become_user: "{{ docker_user_default }}"
+  become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.file:
-    path: "{{ docker_daemon_json_rootless }}"
-    mode: "640"
+    path: "{{ cis_docker_daemon_json_rootless }}/daemon.json"
+    mode: "0640"
     state: file
   when:
-    - docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_18 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_18
   tags:
-    - docker
     - rule_3_18
 
-- name: "AUTOMATED | 3.18 | PATCH | Ensure that daemon.json file permissions are set to 644 or more restrictive"
+- name: "SECTION3 | 3.18 | Ensure that daemon.json file permissions are set to 644 or more restrictive"
   ansible.builtin.file:
-    path: "{{ docker_daemon_json_root }}"
-    mode: "640"
+    path: "{{ cis_docker_daemon_json_root }}/daemon.json"
+    mode: "0640"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_18 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_18
   tags:
-    - docker
     - rule_3_18
 
 # ------------------------------------------------------------------------------
-- name: "AUTOMATED | 3.19 | PATCH | Ensure that the /etc/default/docker file ownership is set to root:root"
+
+- name: "SECTION3 | 3.19 | Ensure that the /etc/default/docker file ownership is set to docker user (ROOTLESS)"
   ansible.builtin.file:
     path: "/etc/default/docker"
-    owner: "root"
-    group: "root"
+    owner: "{{ cis_docker_user_default }}"
+    group: "{{ cis_docker_group_default }}"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_19 | bool
+    - cis_docker_rule_2_1
+    - cis_docker_rule_3_19
   tags:
-    - docker
     - rule_3_19
 
-- name: "AUTOMATED | 3.22 | PATCH | Ensure that the /etc/default/docker file permissions are set to 644 or more restrictively"
+- name: "SECTION3 | 3.19 | Ensure that the /etc/default/docker file ownership is set to root:root"
   ansible.builtin.file:
     path: "/etc/default/docker"
-    mode: "640"
+    owner: "root"
+    group: "root"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_22 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_19
   tags:
-    - docker
-    - rule_3_22
-
-# TODO: # ------------------------------------------------------------------------------
-# - name: "AUTOMATED | 3.20 | PATCH | Ensure that the /etc/sysconfig/docker file permissions are set to 644 or more restrictively"
-#   ansible.builtin.file:
-#     path: "/etc/sysconfig/docker"
-#     mode: "640"
-#     state: file
-#   when:
-#     - not docker_cis_rule_2_1 | bool
-#     - docker_cis_rule_3_20 | bool
-#   tags:
-#     - docker
-#     - rule_3_20
-#
-# - name: "AUTOMATED | 3.21 | PATCH | Ensure that the /etc/sysconfig/docker file ownership is set to root:root"
-#   ansible.builtin.file:
-#     path: "/etc/sysconfig/docker"
-#     owner: "root"
-#     group: "root"
-#     state: file
-#   when:
-#     - not docker_cis_rule_2_1 | bool
-#     - docker_cis_rule_3_21 | bool
-#   tags:
-#     - docker
-#     - rule_3_21
+    - rule_3_19
 
 # ------------------------------------------------------------------------------
-- name: "AUTOMATED | 3.23 | PATCH | Ensure that the Containerd socket file ownership is set to root:root"
+
+- name: "SECTION3 | 3.22 | Ensure that the /etc/default/docker file permissions are set to 644 or more restrictively"
+  ansible.builtin.file:
+    path: "/etc/default/docker"
+    mode: "0640"
+    state: file
+  when:
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_22
+  tags:
+    - rule_3_22
+
+# ------------------------------------------------------------------------------
+
+# - name: "SECTION3 | 3.20 | Ensure that the /etc/sysconfig/docker file permissions are set to 644 or more restrictively"
+# - name: "SECTION3 | 3.21 | Ensure that the /etc/sysconfig/docker file ownership is set to root:root"
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION3 | 3.23 | Ensure that the Containerd socket file ownership is set to root:root"
   ansible.builtin.file:
     path: "/run/containerd/containerd.sock"
     owner: "root"
     group: "root"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_23 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_23
   tags:
-    - docker
     - rule_3_23
 
-- name: "AUTOMATED | 3.24 | PATCH | Ensure that the Containerd socket file permissions are set to 660 or more restrictively"
+- name: "SECTION3 | 3.24 | Ensure that the Containerd socket file permissions are set to 660 or more restrictively"
   ansible.builtin.file:
     path: "/run/containerd/containerd.sock"
-    mode: "660"
+    mode: "0660"
     state: file
   when:
-    - not docker_cis_rule_2_1 | bool
-    - docker_cis_rule_3_24 | bool
+    - not cis_docker_rule_2_1
+    - cis_docker_rule_3_24
   tags:
-    - docker
     - rule_3_24

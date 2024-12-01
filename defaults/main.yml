@@ -1,115 +1,181 @@
 ---
-# defaults file for roles/docker
+# defaults file for ansible-docker
 
-docker_users_to_add_group: []
+# ------------------------------------------------------------------------------
+
+# CIS sections
+# ---------------------------------------
+cis_docker_section_install: true
+cis_docker_section1: true
+cis_docker_section2: true
+cis_docker_section3: true
+cis_docker_section4: true
+cis_docker_section5: true
+cis_docker_section6: true
+cis_docker_section7: true
+
+# CIS rules
+# ---------------------------------------
+# NOTE: relates to 'CIS sections' above.
+#       Section needs to be enabled to also take effect related rules
+## SECTION 1 rules
+cis_docker_rule_1_1_1: true
+cis_docker_rule_1_1_2: true
+cis_docker_rule_1_1_3: true
+cis_docker_rule_1_1_4: true
+cis_docker_rule_1_1_5: true
+cis_docker_rule_1_1_6: true
+cis_docker_rule_1_1_7: true
+cis_docker_rule_1_1_8: true
+cis_docker_rule_1_1_9: true
+cis_docker_rule_1_1_10: true
+cis_docker_rule_1_1_11: true
+cis_docker_rule_1_1_12: true
+cis_docker_rule_1_1_13: true
+cis_docker_rule_1_1_14: true
+cis_docker_rule_1_1_15: true
+cis_docker_rule_1_1_16: true
+cis_docker_rule_1_1_17: true
+cis_docker_rule_1_1_18: true
+cis_docker_rule_1_2_1: true
+cis_docker_rule_1_2_2: true
+## SECTION 2 rules
+cis_docker_rule_2_1: false # NOTE: set 'true' to install rootless, and 'false' for install as root
+cis_docker_rule_2_2: false # NOTE: set as 'false' to allow containers communicate with each other over the network
+cis_docker_rule_2_3: true
+cis_docker_rule_2_4: true
+cis_docker_rule_2_5: true
+cis_docker_rule_2_6: true # NOTE: depends also on 'cis_docker_storage_driver'
+# cis_docker_rule_2_7: true
+cis_docker_rule_2_8: true
+cis_docker_rule_2_9: true
+cis_docker_rule_2_10: true
+# cis_docker_rule_2_11: true
+# cis_docker_rule_2_12: true
+cis_docker_rule_2_13: true
+cis_docker_rule_2_14: true
+cis_docker_rule_2_15: true # NOTE: depends also on 'cis_docker_is_swarm_mode'
+cis_docker_rule_2_16: true
+cis_docker_rule_2_17: true # NOTE: depends also on 'cis_docker_seccomp_profile'
+cis_docker_rule_2_18: true
+## SECTION 3 rules
+cis_docker_rule_3_1: true
+cis_docker_rule_3_2: true
+cis_docker_rule_3_3: true
+cis_docker_rule_3_4: true
+cis_docker_rule_3_5: true
+cis_docker_rule_3_6: true
+# cis_docker_rule_3_7: false
+# cis_docker_rule_3_8: true
+# cis_docker_rule_3_9: true
+# cis_docker_rule_3_10: true
+# cis_docker_rule_3_11: true
+# cis_docker_rule_3_12: true
+# cis_docker_rule_3_13: true
+# cis_docker_rule_3_14: true
+cis_docker_rule_3_15: true
+cis_docker_rule_3_16: true
+cis_docker_rule_3_17: true
+cis_docker_rule_3_18: true
+cis_docker_rule_3_19: true
+cis_docker_rule_3_22: true
+# cis_docker_rule_3_20: true
+# cis_docker_rule_3_21: true
+cis_docker_rule_3_23: true
+cis_docker_rule_3_24: true
+## SECTION 4 rules
+cis_docker_rule_4_1: true
+cis_docker_rule_4_2: true
+## SECTION 5 rules
+cis_docker_rule_5_1: true
+## SECTION 6 rules
+cis_docker_rule_6_1: false
+cis_docker_rule_6_2: false
+## SECTION 7 rules
+cis_docker_rule_7_1: true # NOTE: depends also on 'cis_docker_is_swarm_mode'
+# cis_docker_rule_7_2: true
+cis_docker_rule_7_3: true
+cis_docker_rule_7_4: true
+# cis_docker_rule_7_5: true
+cis_docker_rule_7_6: false # NOTE: depends also on 'cis_docker_is_swarm_mode'
+cis_docker_rule_7_7: false # NOTE: depends also on 'cis_docker_is_swarm_mode'
+cis_docker_rule_7_8: false # NOTE: depends also on 'cis_docker_is_swarm_mode'
+cis_docker_rule_7_9: false # NOTE: depends also on 'cis_docker_is_swarm_mode'
+cis_docker_rule_7_10: true # NOTE: depends also on 'cis_docker_is_swarm_mode', 'cis_docker_swarm_advertise_addr' and 'cis_docker_swarm_data_path_addr'
+
+# ------------------------------------------------------------------------------
+# HELPER
+# ---------------------------------------
+cis_docker_regex_base_search: '^(#(\s)*)?'
+cis_docker_regex_base_search_equals: '\s*=.*$'
+cis_docker_regex_base_search_end: '(\s|$)'
+cis_docker_print_info_join_by: "\n"
+
+# ------------------------------------------------------------------------------
+
+cis_docker_users_to_add_group: []
 # - name: "{{ ansible_user }}"
 
-# docker_type: worker # manager | worker
-
-docker_package_dependencies:
-  - systemd-container
+cis_docker_package_dependencies:
   - apt-transport-https
   - ca-certificates
   - curl
-  - gnupg-agent
   - software-properties-common
-  - pkg-config
-  - python3
-  - python3-pip
+cis_docker_pip_dependencies: []
 
-docker_pip_dependencies: []
-
-docker_install_gpg:
+cis_docker_install_gpg:
   id: 0EBFCD88
   url: https://download.docker.com/linux/ubuntu/gpg
   name: docker_release_ce.gpg
   path: /etc/apt/trusted.gpg.d
-docker_install_repo: https://download.docker.com/linux/ubuntu
-docker_install_version: stable
-docker_install_release_fallback: "{{ omit }}" # jammy
-docker_install_release_skip: "{{ omit }}" # lunar
-docker_install_apt:
+cis_docker_install_repo: https://download.docker.com/linux/ubuntu
+cis_docker_install_version: stable
+# cis_docker_install_release_fallback: jammy
+# cis_docker_install_release_skip: lunar
+
+cis_docker_install_apt:
   - docker-ce
   - docker-ce-cli
-  - docker-ce-rootless-extras
   - containerd.io
+  - docker-buildx-plugin
   - docker-compose-plugin
-docker_install_pip_update: false
-docker_install_pip: []
+cis_docker_install_pip: []
 
-docker_user_default: docker
-docker_group_default: docker
-docker_user_shell: /bin/bash
+cis_docker_user_default: docker
+cis_docker_group_default: docker
+cis_docker_user_shell: /bin/bash
 
-docker_daemon_json_root: /etc/docker/daemon.json
-docker_daemon_json_rootless: ~/.config/docker/daemon.json
+cis_docker_daemon_json_root: /etc/docker
+cis_docker_daemon_json_rootless: ~/.config/docker
 
 # if swarm mode is needed, this value should be 'true'
 # will set in 'daemon.json' the value 'live-restore' to 'false'
-# by 'true' the rule 'docker_cis_rule_2_15' will be disabled
-docker_is_swarm_mode: false
+# by 'true' the rule 'cis_docker_rule_2_15' will be disabled
+cis_docker_is_swarm_mode: false
 
-# ------------------------------------------------------------------------------
+# cis_docker_rule_2_6
+# cis_docker_storage_driver: overlay2
 
-# SECTION 1
-docker_cis_section1: true
-docker_cis_rule_1_1_1: true
-docker_cis_rule_1_1_2: true
-docker_cis_rule_1_1_3: true
-docker_cis_rule_1_1_4: true
-docker_cis_rule_1_1_5: true
-docker_cis_rule_1_1_6: true
-docker_cis_rule_1_1_7: true
-docker_cis_rule_1_1_8: true
-docker_cis_rule_1_1_9: true
-docker_cis_rule_1_1_10: true
-docker_cis_rule_1_1_11: true
-docker_cis_rule_1_1_12: true
-docker_cis_rule_1_1_13: true
-docker_cis_rule_1_1_14: true
-docker_cis_rule_1_1_15: true
-docker_cis_rule_1_1_16: true
-docker_cis_rule_1_1_17: true
-docker_cis_rule_1_1_18: true
-docker_cis_rule_1_2_1: true
-docker_cis_rule_1_2_2: true
+# cis_docker_rule_2_8
+cis_docker_default_ulimit_nofile_min: 65535
+cis_docker_default_ulimit_nofile_max: 65535
+cis_docker_default_ulimit_nproc_min: 1024
+cis_docker_default_ulimit_nproc_max: 2048
+cis_docker_default_ulimit_memlock_min: -1
+cis_docker_default_ulimit_memlock_max: -1
+cis_docker_default_ulimit_fsize: -1
+cis_docker_default_ulimit_as: -1
 
-# SECTION 2
-docker_cis_section2: true
-# set true to install rootless, false for as root
-docker_cis_rule_2_1: false
-docker_cis_rule_2_2: false
-docker_cis_rule_2_3: true
-docker_cis_rule_2_4: true
-# TODO: 2.6 is set to false, because runs into failure, need to be checked
-docker_cis_rule_2_6: false
-# TODO:  2.7 is set to false, because not tested and will run into error
-docker_cis_rule_2_7: false
-docker_cis_rule_2_8: true
-docker_cis_rule_2_9: true
-docker_cis_rule_2_13: true
-docker_cis_rule_2_14: true
-docker_cis_rule_2_15: true
-docker_cis_rule_2_16: true
-docker_cis_rule_2_18: true
+# cis_docker_rule_2_10
+cis_docker_cgroup_parent: system.slice
 
-# SECTION 3
-docker_cis_section3: true
-docker_cis_rule_3_1: true
-docker_cis_rule_3_2: true
-docker_cis_rule_3_3: true
-docker_cis_rule_3_4: true
-docker_cis_rule_3_5: true
-docker_cis_rule_3_6: true
-# TODO: docker_cis_rule_3_7: false
-# TODO: docker_cis_rule_3_8: true
-docker_cis_rule_3_15: true
-docker_cis_rule_3_16: true
-docker_cis_rule_3_17: true
-docker_cis_rule_3_18: true
-docker_cis_rule_3_19: true
-docker_cis_rule_3_22: true
-# TODO: docker_cis_rule_3_20: true
-# TODO: docker_cis_rule_3_21: true
-docker_cis_rule_3_23: true
-docker_cis_rule_3_24: true
+# cis_docker_rule_2_13
+cis_docker_log_driver: syslog
+# cis_docker_rule_2_17
+# cis_docker_seccomp_profile: </path/to/seccomp/profile>
+
+# cis_docker_rule_7_8
+cis_docker_swarm_cert_expiry: 48h
+# cis_docker_rule_7_10
+# cis_docker_swarm_advertise_addr: # NOTE: Example 192.168.0.1
+# cis_docker_swarm_data_path_addr: # NOTE: Example 17.1.0.3

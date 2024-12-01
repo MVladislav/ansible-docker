@@ -23,9 +23,9 @@ jobs:
         python-version:
           [
             { version: "3.10", param: "" },
-            { version: "3.11", param: "--break-system-packages" },
+            { version: "3.12", param: "--break-system-packages" },
           ]
-        molecule-os: ["ubuntu2204", "ubuntu2304"]
+        molecule-os: ["ubuntu2204", "ubuntu2404"]
 
     steps:
       # https://github.com/actions/checkout
