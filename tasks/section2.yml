@@ -242,3 +242,23 @@
         owner: root
         group: root
         mode: "0640"
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.2.* | restart docker-service (ROOTLESS)"
+  become: true
+  become_user: "{{ cis_docker_user_default }}"
+  ansible.builtin.service:
+    name: docker.service
+    state: restarted
+    enabled: true
+  when:
+    - cis_docker_rule_2_1
+
+- name: "SECTION2 | 2.2.* | restart docker-service"
+  ansible.builtin.service:
+    name: docker.service
+    state: restarted
+    enabled: true
+  when:
+    - not cis_docker_rule_2_1

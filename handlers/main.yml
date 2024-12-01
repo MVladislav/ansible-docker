@@ -3,7 +3,7 @@
 
 # ------------------------------------------------------------------------------
 
-- name: "HANDLER | 2.2.* | restart docker-service as rootless"
+- name: "HANDLER | 2.2.* | restart docker-service (ROOTLESS)"
   become: true
   become_user: "{{ cis_docker_user_default }}"
   ansible.builtin.service:
@@ -15,7 +15,7 @@
   when:
     - cis_docker_rule_2_1
 
-- name: "HANDLER | 2.2.* | restart docker-service as root"
+- name: "HANDLER | 2.2.* | restart docker-service"
   become: true
   ansible.builtin.service:
     name: docker.service
