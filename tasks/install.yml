@@ -39,11 +39,11 @@
 # ------------------------------------------------------------------------------
 
 - name: "INSTALL | add docker apt signing key"
-  ansible.builtin.apt_key:
+  ansible.builtin.get_url:
     url: "{{ cis_docker_install_gpg.url }}"
-    keyring: "{{ cis_docker_install_gpg.path }}/{{ cis_docker_install_gpg.name }}"
-    state: present
-    # id: "{{ item.id | default(omit) }}"
+    dest: "{{ cis_docker_install_gpg.path }}/{{ cis_docker_install_gpg.name }}"
+    mode: "0644"
+    force: true
   tags:
     - install
 

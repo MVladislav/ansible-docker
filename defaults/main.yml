@@ -127,7 +127,7 @@ cis_docker_pip_dependencies: []
 cis_docker_install_gpg:
   id: 0EBFCD88
   url: https://download.docker.com/linux/ubuntu/gpg
-  name: docker_release_ce.gpg
+  name: docker_release_ce.asc
   path: /etc/apt/trusted.gpg.d
 cis_docker_install_repo: https://download.docker.com/linux/ubuntu
 cis_docker_install_version: stable
