@@ -20,11 +20,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version:
-          [
-            { version: "3.10", param: "" },
-            { version: "3.12", param: "--break-system-packages" },
-          ]
+        python-version: [{ version: "3.12", param: "--break-system-packages" }]
         molecule-os: ["ubuntu2204", "ubuntu2404"]
 
     steps:
@@ -42,7 +38,7 @@ jobs:
           python3 -m pip install --upgrade pip ${{ matrix.python-version.param }}
           python3 -m pip install -r requirements.txt ${{ matrix.python-version.param }}
 
-      - name: Test with molecule
+      - name: Run Molecule Test
         run: molecule test -s ${{ matrix.molecule-os }}
         env:
           PY_COLOR: "1"

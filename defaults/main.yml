@@ -171,7 +171,7 @@ cis_docker_default_ulimit_as: -1
 cis_docker_cgroup_parent: system.slice
 
 # cis_docker_rule_2_13
-cis_docker_log_driver: syslog
+cis_docker_log_driver: syslog # syslog | journald
 # cis_docker_rule_2_17
 # cis_docker_seccomp_profile: </path/to/seccomp/profile>
 

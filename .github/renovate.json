@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "dependencyDashboard": false,
+  "labels": ["dependencies"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "extends": ["config:recommended"],
+  "rebaseWhen": "behind-base-branch",
+  "packageRules": [
+    {
+      "addLabels": ["github_actions"],
+      "matchManagers": ["github-actions"],
+      "rangeStrategy": "pin",
+      "groupName": "GitHub Actions",
+      "automerge": false
+    },
+    {
+      "addLabels": ["pre-commit"],
+      "matchManagers": ["pre-commit"],
+      "rangeStrategy": "pin",
+      "groupName": "Pre-commit hooks",
+      "automerge": false
+    },
+    {
+      "addLabels": ["ansible"],
+      "matchManagers": ["ansible-galaxy"],
+      "rangeStrategy": "pin",
+      "groupName": "Ansible collections",
+      "automerge": false
+    }
+  ],
+  "pre-commit": {
+    "enabled": true
+  }
+}
