@@ -116,6 +116,7 @@ cis_docker_print_info_join_by: "\n"
 cis_docker_users_to_add_group: []
 # - name: "{{ ansible_user }}"
 
+cis_docker_distribution_key_use_modern_sources: false
 cis_docker_package_dependencies:
   - apt-transport-https
   - ca-certificates

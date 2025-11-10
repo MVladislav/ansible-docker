@@ -1,0 +1,10 @@
+{# templates/apt-sources.j2 - modern Debian .sources format #}
+Types: deb
+{% set uri = (cis_docker_install_repo | trim('/') ) + '/' %}
+URIs: {{ uri }}
+Suites: {{ cis_docker_os_distribution }}
+Components: {{ cis_docker_install_version }}
+Signed-By: {{ cis_docker_install_gpg.path }}/{{ cis_docker_install_gpg.name }}
+{% if cis_docker_os_architecture is defined and cis_docker_os_architecture.stdout is defined %}
+Architectures: {{ cis_docker_os_architecture.stdout }}
+{% endif %}
