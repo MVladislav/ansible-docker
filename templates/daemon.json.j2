@@ -1,27 +1,27 @@
 {
 {# SECTION 2 #}
 {# ============================================================================== #}
-{% if cis_docker_rule_2_2 == true -%}
+{%- if cis_docker_rule_2_2 == true %}
   "icc": false,
 {% else %}
   "icc": true,
 {% endif %}
-{% if cis_docker_rule_2_3 == true -%}
+{%- if cis_docker_rule_2_3 == true %}
   "log-level": "info",
 {% endif %}
-{% if cis_docker_rule_2_4 == true -%}
+{%- if cis_docker_rule_2_4 == true %}
   "iptables": true,
 {% endif %}
-{% if cis_docker_rule_2_6 == true and cis_docker_storage_driver is defined -%}
+{%- if cis_docker_rule_2_6 == true and cis_docker_storage_driver is defined %}
   "storage-driver": "{{ cis_docker_storage_driver }}",
 {% endif %}
-{# {% if cis_docker_rule_2_7 == true -%}
+{#- {% if cis_docker_rule_2_7 == true %}
   "tlsverify": true,
   "tlscacert": true,
   "tlscert": true,
   "tlskey": true,
 {% endif %} #}
-{% if cis_docker_rule_2_8 == true -%}
+{%- if cis_docker_rule_2_8 == true %}
   "default-ulimit": [
     "nofile={{ cis_docker_default_ulimit_nofile_min }}:{{ cis_docker_default_ulimit_nofile_max }}",
     "nproc={{ cis_docker_default_ulimit_nproc_min }}:{{ cis_docker_default_ulimit_nproc_max }}",
@@ -30,30 +30,30 @@
     "as={{ cis_docker_default_ulimit_as }}"
   ],
 {% endif %}
-{% if cis_docker_rule_2_9 == true and cis_docker_rule_2_1 == true -%}
+{%- if cis_docker_rule_2_9 == true and cis_docker_rule_2_1 == true %}
   "userns-remap": "default",
 {% endif %}
-{% if cis_docker_rule_2_10 == true -%}
+{%- if cis_docker_rule_2_10 == true %}
   "cgroup-parent": "{{ cis_docker_cgroup_parent }}",
 {% endif %}
-{% if cis_docker_rule_2_13 == true -%}
+{%- if cis_docker_rule_2_13 == true %}
   "log-driver": "{{ cis_docker_log_driver }}",
 {% endif %}
-{% if cis_docker_rule_2_14 == true -%}
+{%- if cis_docker_rule_2_14 == true %}
   "no-new-privileges": true,
 {% endif %}
-{% if cis_docker_rule_2_15 == true and cis_docker_is_swarm_mode == false -%}
+{%- if cis_docker_rule_2_15 == true and cis_docker_is_swarm_mode == false %}
   "live-restore": true,
 {% else %}
   "live-restore": false,
 {% endif %}
-{% if cis_docker_rule_2_16 == true -%}
+{%- if cis_docker_rule_2_16 == true %}
   "userland-proxy": false,
 {% endif %}
-{% if cis_docker_rule_2_17 == true and cis_docker_seccomp_profile is defined -%}
+{%- if cis_docker_rule_2_17 == true and cis_docker_seccomp_profile is defined %}
   "seccomp-profile": "{{ cis_docker_seccomp_profile }}",
 {% endif %}
-{% if cis_docker_rule_2_18 == true -%}
+{%- if cis_docker_rule_2_18 == true %}
   "experimental": false
 {% endif %}
 }
