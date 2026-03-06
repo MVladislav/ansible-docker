@@ -74,6 +74,9 @@ cis_docker_rule_2_1: false
 # For disable containers communicate set to 'true'
 cis_docker_rule_2_2: false
 
+# Enable namespace user isolation
+cis_docker_rule_2_9: false
+
 # They will remove content you should be aware you not need
 cis_docker_rule_6_1: false
 cis_docker_rule_6_2: false

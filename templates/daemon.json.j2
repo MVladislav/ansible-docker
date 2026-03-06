@@ -30,8 +30,8 @@
     "as={{ cis_docker_default_ulimit_as }}"
   ],
 {% endif %}
-{%- if cis_docker_rule_2_9 == true and cis_docker_rule_2_1 == true %}
-  "userns-remap": "default",
+{%- if cis_docker_rule_2_9 == true and cis_docker_rule_2_1 == false %}
+  "userns-remap": "{{ cis_docker_user_default }}:{{ cis_docker_group_default }}",
 {% endif %}
 {%- if cis_docker_rule_2_10 == true %}
   "cgroup-parent": "{{ cis_docker_cgroup_parent }}",

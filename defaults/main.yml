@@ -48,7 +48,7 @@ cis_docker_rule_2_5: true
 cis_docker_rule_2_6: true # NOTE: depends also on 'cis_docker_storage_driver'
 # cis_docker_rule_2_7: true
 cis_docker_rule_2_8: true
-cis_docker_rule_2_9: true
+cis_docker_rule_2_9: false
 cis_docker_rule_2_10: true
 # cis_docker_rule_2_11: true
 # cis_docker_rule_2_12: true

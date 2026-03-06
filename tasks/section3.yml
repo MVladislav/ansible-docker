@@ -187,13 +187,13 @@
   block:
     - name: "SECTION3 | 3.15 | Ensure that the Docker socket file ownership is set to docker user"
       ansible.builtin.file:
-        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        path: "/var/run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}/docker.sock"
         owner: "{{ cis_docker_user_default }}"
         group: "{{ cis_docker_group_default }}"
         state: file
     - name: "SECTION3 | 3.15 | Ensure that the Docker socket directory ownership is set to docker user"
       ansible.builtin.file:
-        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+        path: "/var/run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}"
         owner: "{{ cis_docker_user_default }}"
         group: "{{ cis_docker_group_default }}"
         mode: "0770"
@@ -222,12 +222,12 @@
   block:
     - name: "SECTION3 | 3.16 | Ensure that the Docker socket file permissions are set to 660 or more restrictively"
       ansible.builtin.file:
-        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        path: "/var/run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}/docker.sock"
         mode: "0660"
         state: file
     - name: "SECTION3 | 3.16 | Ensure that the Docker socket directory permissions are set to 770 or more restrictively"
       ansible.builtin.file:
-        path: "/var/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+        path: "/var/run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}"
         mode: "0770"
         state: directory
 

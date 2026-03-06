@@ -25,33 +25,35 @@
         path: /usr/bin/rootlesskit
         capability: cap_net_bind_service=ep
         state: present
-    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | add to subuid '{{ cis_docker_user_default }}'"
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | set nf_tables module"
       ansible.builtin.lineinfile:
-        dest: /etc/subuid
-        regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
-        line: "{{ cis_docker_user_default }}:100000:65536"
+        dest: /etc/modules-load.d/docker.conf
+        regexp: "{{ cis_docker_regex_base_search }}nf_tables"
+        line: "nf_tables"
         state: present
-        mode: "0644"
         create: true
-    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | add to subgid '{{ cis_docker_user_default }}'"
-      ansible.builtin.lineinfile:
-        dest: /etc/subgid
-        regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
-        line: "{{ cis_docker_user_default }}:100000:65536"
+        owner: root
+        group: root
+        mode: "0644"
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | load nf_tables module"
+      community.general.modprobe:
+        name: nf_tables
         state: present
-        mode: "0644"
-        create: true
+      when: ansible_facts['virtualization_type'] != "docker"
     # .......................................
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | stop docker.socket root service"
-      ansible.builtin.service:
+      ansible.builtin.systemd_service:
         name: docker.socket
         state: stopped
         enabled: false
+        masked: true
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | stop docker.service root service"
-      ansible.builtin.service:
+      ansible.builtin.systemd_service:
         name: docker.service
         state: stopped
         enabled: false
+        masked: true
     # .......................................
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | run dockerd-rootless-setuptool.sh as user {{ cis_docker_user_default }}"
       ansible.builtin.command: "loginctl enable-linger {{ cis_docker_user_default }}"
@@ -68,13 +70,13 @@
         regexp: "{{ cis_docker_regex_base_search }}{{ item.key }}{{ cis_docker_regex_base_search_end }}"
         line: "{{ item.key }}={{ item.value }}"
         state: present
-        mode: "0644"
+        mode: "0640"
         create: true
       with_items:
         - key: export XDG_RUNTIME_DIR
-          value: "/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
+          value: "/run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}"
         - key: export DOCKER_HOST
-          value: "unix:///run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+          value: "unix:///run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}/docker.sock"
     # .......................................
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | reboot system after stop docker"
       ansible.builtin.reboot:
@@ -84,15 +86,32 @@
       become_user: "{{ cis_docker_user_default }}"
       ansible.builtin.command: /usr/bin/dockerd-rootless-setuptool.sh install
       environment:
-        XDG_RUNTIME_DIR: "/run/user/{{ getent_passwd[cis_docker_user_default][1] }}"
-        DOCKER_HOST: "unix:///run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}"
+        DOCKER_HOST: "unix:///run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}/docker.sock"
       changed_when: false
+    # .......................................
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | create docker override directory"
+      become: true
+      become_user: "{{ cis_docker_user_default }}"
+      ansible.builtin.file:
+        path: ~/.config/systemd/user/docker.service.d
+        state: directory
+        mode: "0750"
+    - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | add ignore bridge-netfilter errors"
+      become: true
+      become_user: "{{ cis_docker_user_default }}"
+      ansible.builtin.copy:
+        content: |
+          [Service]
+          Environment="DOCKER_IGNORE_BR_NETFILTER_ERROR=1"
+        dest: ~/.config/systemd/user/docker.service.d/override.conf
+        mode: "0640"
     # .......................................
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | set env DOCKER_HOST global"
       ansible.builtin.lineinfile:
         dest: /etc/environment
         regexp: "{{ cis_docker_regex_base_search }}DOCKER_HOST{{ cis_docker_regex_base_search_end }}"
-        line: "DOCKER_HOST=unix:///run/user/{{ getent_passwd[cis_docker_user_default][1] }}/docker.sock"
+        line: "DOCKER_HOST=unix:///run/user/{{ ansible_facts['getent_passwd'][cis_docker_user_default][1] }}/docker.sock"
         state: present
         mode: "0644"
         create: true
@@ -163,16 +182,22 @@
     - rule_2_9
     - molecule-idempotence-notest
   block:
-    - name: "SECTION2 | 2.9 | Enable user namespace support | touch /etc/subuid"
-      ansible.builtin.file:
-        path: /etc/subuid
-        state: touch
+    - name: "SECTION2 | 2.9 | Enable user namespace support | add to subuid '{{ cis_docker_user_default }}'"
+      ansible.builtin.lineinfile:
+        dest: /etc/subuid
+        regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
+        line: "{{ cis_docker_user_default }}:100000:65536"
+        state: present
         mode: "0644"
-    - name: "SECTION2 | 2.9 | Enable user namespace support | touch /etc/subgid"
-      ansible.builtin.file:
-        path: /etc/subgid
-        state: touch
+        create: true
+    - name: "SECTION2 | 2.9 | Enable user namespace support | add to subgid '{{ cis_docker_user_default }}'"
+      ansible.builtin.lineinfile:
+        dest: /etc/subgid
+        regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
+        line: "{{ cis_docker_user_default }}:100000:65536"
+        state: present
         mode: "0644"
+        create: true
 
 # ------------------------------------------------------------------------------
 
@@ -249,10 +274,13 @@
 - name: "SECTION2 | 2.2.* | restart docker-service (ROOTLESS)"
   become: true
   become_user: "{{ cis_docker_user_default }}"
-  ansible.builtin.service:
+  ansible.builtin.systemd_service:
     name: docker.service
-    state: restarted
+    daemon_reload: true
     enabled: true
+    masked: false
+    state: restarted
+    scope: user
   when:
     - cis_docker_rule_2_1
   tags:
@@ -260,10 +288,12 @@
     - molecule-idempotence-notest
 
 - name: "SECTION2 | 2.2.* | restart docker-service"
-  ansible.builtin.service:
+  ansible.builtin.systemd_service:
     name: docker.service
-    state: restarted
+    daemon_reload: true
     enabled: true
+    masked: false
+    state: restarted
   when:
     - not cis_docker_rule_2_1
   tags:

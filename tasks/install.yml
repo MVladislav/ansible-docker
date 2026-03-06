@@ -84,7 +84,7 @@
 
 - name: "INSTALL | compute candidate distro"
   ansible.builtin.set_fact:
-    cis_docker_os_distribution: "{{ (ansible_lsb.codename | default(ansible_distribution_release | default(''))) | lower }}"
+    cis_docker_os_distribution: "{{ (ansible_facts['lsb'].codename | default(ansible_facts['distribution_release'] | default(''))) | lower }}"
   tags:
     - install
 
@@ -152,7 +152,7 @@
 
 - name: "INSTALL | install Docker apt packages"
   ansible.builtin.apt:
-    pkg: "{{ cis_docker_install_apt }}"
+    name: "{{ cis_docker_install_apt }}"
     state: present
     force_apt_get: true # apt-get instead of aptitude
     update_cache: true
