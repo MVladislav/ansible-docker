@@ -94,7 +94,7 @@
       become: true
       become_user: "{{ cis_docker_user_default }}"
       ansible.builtin.file:
-        path: ~/.config/systemd/user/docker.service.d
+        path: "{{ cis_docker_systemd_path_rootless }}/docker.service.d"
         state: directory
         mode: "0750"
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | add ignore bridge-netfilter errors"
@@ -104,7 +104,7 @@
         content: |
           [Service]
           Environment="DOCKER_IGNORE_BR_NETFILTER_ERROR=1"
-        dest: ~/.config/systemd/user/docker.service.d/override.conf
+        dest: "{{ cis_docker_systemd_path_rootless }}/docker.service.d/override.conf"
         mode: "0640"
     # .......................................
     - name: "SECTION2 | 2.1 | Run the Docker daemon as a non-root user, if possible | set env DOCKER_HOST global"
@@ -115,6 +115,17 @@
         state: present
         mode: "0644"
         create: true
+
+# ------------------------------------------------------------------------------
+
+# - name: "SECTION2 | 2.2 | Ensure network traffic is restricted between containers on the default bridge"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.3 | Ensure the logging level is set to 'info'"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.4 | Ensure Docker is allowed to make changes to iptables"
+#   # NOTE: is directly set inside 'daemon.json'
 
 # ------------------------------------------------------------------------------
 
@@ -173,16 +184,51 @@
           {{ cis_docker_2_6_storage_driver_used.stdout_lines | join(cis_docker_print_info_join_by) }}
           #############################################################################################
 
+- name: "SECTION2 | 2.7 | Ensure devicemapper storage driver is not used"
+  when:
+    - cis_docker_rule_2_7
+  tags:
+    - rule_2_7
+  block:
+    - name: "SECTION2 | 2.7 | Ensure devicemapper storage driver is not used | get info"
+      ansible.builtin.shell: >
+        {% raw %}
+        docker info --format 'Storage Driver: {{ .Driver }}'
+        {% endraw %}
+      args:
+        executable: "{{ cis_docker_user_shell }}"
+      register: cis_docker_2_7_storage_driver_used
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION2 | 2.7 | Ensure devicemapper storage driver is not used | print info"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          Ensure devicemapper storage driver is not used.
+          Do not explicitly use devicemapper as storage driver.
+          #############################################################################################
+          {{ cis_docker_2_7_storage_driver_used.stdout_lines | join(cis_docker_print_info_join_by) }}
+          #############################################################################################
+
 # ------------------------------------------------------------------------------
 
-- name: "SECTION2 | 2.9 | Enable user namespace support"
+# - name: "SECTION2 | 2.8 | Ensure TLS authentication for Docker daemon is configured"
+
+# - name: "SECTION2 | 2.9 | Ensure the default ulimit is configured appropriately"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# ------------------------------------------------------------------------------
+
+- name: "SECTION2 | 2.10 | Enable user namespace support"
   when:
-    - cis_docker_rule_2_9
+    - cis_docker_rule_2_10
+    # - not cis_docker_rule_2_1
   tags:
-    - rule_2_9
+    - rule_2_10
     - molecule-idempotence-notest
   block:
-    - name: "SECTION2 | 2.9 | Enable user namespace support | add to subuid '{{ cis_docker_user_default }}'"
+    - name: "SECTION2 | 2.10 | Enable user namespace support | add to subuid '{{ cis_docker_user_default }}'"
       ansible.builtin.lineinfile:
         dest: /etc/subuid
         regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
@@ -190,7 +236,7 @@
         state: present
         mode: "0644"
         create: true
-    - name: "SECTION2 | 2.9 | Enable user namespace support | add to subgid '{{ cis_docker_user_default }}'"
+    - name: "SECTION2 | 2.10 | Enable user namespace support | add to subgid '{{ cis_docker_user_default }}'"
       ansible.builtin.lineinfile:
         dest: /etc/subgid
         regexp: "{{ cis_docker_regex_base_search }}{{ cis_docker_user_default }}{{ cis_docker_regex_base_search_end }}"
@@ -198,6 +244,34 @@
         state: present
         mode: "0644"
         create: true
+
+# ------------------------------------------------------------------------------
+
+# - name: "SECTION2 | 2.11 | Ensure the default cgroup usage has been confirmed"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.12 | Ensure base device size is not changed until needed"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.13 | Ensure that authorization for Docker client commands is enabled"
+
+# - name: "SECTION2 | 2.14 | Ensure centralized and remote logging is configured"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.15 | Ensure containers are restricted from acquiring new privileges"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.16 | Ensure live restore is enabled"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.17 | Ensure Userland Proxy is Disabled"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.18 | Ensure that a daemon-wide custom seccomp profile is applied if appropriate"
+#   # NOTE: is directly set inside 'daemon.json'
+
+# - name: "SECTION2 | 2.19 | Ensure that experimental features are not implemented in production"
+#   # NOTE: is directly set inside 'daemon.json'
 
 # ------------------------------------------------------------------------------
 

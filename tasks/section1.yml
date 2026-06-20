@@ -3,12 +3,16 @@
 
 # ------------------------------------------------------------------------------
 
-# - name: "SECTION1 | 1.1.1 | Ensure a separate partition for containers has been created"
-#   # TODO: need rule
-#   when:
-#     - cis_docker_rule_1_1_1
-#   tags:
-#     - rule_1.1.1
+- name: "SECTION1 | 1.1.1 | Ensure a separate partition for containers has been created"
+  ansible.builtin.debug:
+    msg: |
+      #############################################################################################
+      All Docker containers and their data and metadata will be stored into: '{{ cis_docker_data_root }}'
+      #############################################################################################
+  when:
+    - cis_docker_rule_1_1_1
+  tags:
+    - rule_1_1_1
 
 # ------------------------------------------------------------------------------
 
@@ -38,6 +42,26 @@
         groups: "{{ cis_docker_group_default }}"
         append: true
       loop: "{{ cis_docker_users_to_add_group | flatten(levels=1) }}"
+    - name: "SECTION1 | 1.1.2 | Ensure only trusted users are allowed to control Docker daemon | get group info"
+      ansible.builtin.command: getent group "{{ cis_docker_group_default }}"
+      register: cis_docker_group_info
+      changed_when: false
+      failed_when: false
+      check_mode: false
+    - name: "SECTION1 | 1.1.2 | Ensure only trusted users are allowed to control Docker daemon | extract group members"
+      ansible.builtin.set_fact:
+        cis_docker_group_users: >-
+          {{
+            (cis_docker_group_info.stdout.split(':')[-1].split(','))
+            if (cis_docker_group_info.stdout is defined and ':' in cis_docker_group_info.stdout and cis_docker_group_info.stdout.split(':')[-1] != '')
+            else []
+          }}
+    - name: "SECTION1 | 1.1.2 | Ensure only trusted users are allowed to control Docker daemon | print group members"
+      ansible.builtin.debug:
+        msg: |
+          #############################################################################################
+          Group members: {{ cis_docker_group_users | join(', ') if cis_docker_group_users | length > 0 else 'NONE' }}
+          #############################################################################################
 
 # ------------------------------------------------------------------------------
 
@@ -76,11 +100,18 @@
 - name: "SECTION1 | 1.1.5 | Ensure auditing is configured for Docker files and directories - /var/lib/docker"
   ansible.builtin.lineinfile:
     dest: /etc/audit/rules.d/cis_docker_rule_1_1_3-18.rules
-    regexp: "{{ cis_docker_regex_base_search }}-a exit,always -F path=/var/lib/docker{{ cis_docker_regex_base_search_end }}"
-    line: "-a exit,always -F path=/var/lib/docker -F perm=war -k docker"
+    regexp: "{{ cis_docker_regex_base_search }}{{ item.regex }}{{ cis_docker_regex_base_search_end }}"
+    line: "{{ item.line }}"
     state: present
     mode: "640"
     create: true
+  with_items:
+    - regex: "-F path={{ cis_docker_data_root }}"
+      line: "-a exit,always -F path={{ cis_docker_data_root }} -F perm=war -k docker"
+    - regex: "-F dir={{ cis_docker_data_root }}{{ cis_docker_namespace_remapping_path }}/volumes"
+      line: "-a exit,never -F dir={{ cis_docker_data_root }}{{ cis_docker_namespace_remapping_path }}/volumes"
+    - regex: "-F dir={{ cis_docker_data_root }}{{ cis_docker_namespace_remapping_path }}/overlay2"
+      line: "-a exit,never -F dir={{ cis_docker_data_root }}{{ cis_docker_namespace_remapping_path }}/overlay2"
   when:
     - cis_docker_rule_1_1_5
     - cis_docker_package_installed_auditd.rc == 0
@@ -108,8 +139,8 @@
 - name: "SECTION1 | 1.1.7 | Ensure auditing is configured for Docker files and directories - docker.service"
   ansible.builtin.lineinfile:
     dest: /etc/audit/rules.d/cis_docker_rule_1_1_3-18.rules
-    regexp: "{{ cis_docker_regex_base_search }}-w /usr/lib/systemd/system/docker.service{{ cis_docker_regex_base_search_end }}"
-    line: "-w /usr/lib/systemd/system/docker.service -k docker"
+    regexp: "{{ cis_docker_regex_base_search }}-w {{ cis_docker_systemd_path_root }}/docker.service{{ cis_docker_regex_base_search_end }}"
+    line: "-w {{ cis_docker_systemd_path_root }}/docker.service -k docker"
     state: present
     mode: "640"
     create: true
@@ -137,7 +168,7 @@
   tags:
     - rule_1_1_8
 
-- name: "SECTION1 | 1.1.9 | Ensure auditing is configured for Docker files and directories - docker.socket"
+- name: "SECTION1 | 1.1.9 | Ensure auditing is configured for Docker files and directories - docker.sock"
   ansible.builtin.lineinfile:
     dest: /etc/audit/rules.d/cis_docker_rule_1_1_3-18.rules
     regexp: "{{ cis_docker_regex_base_search }}-w /var/run/docker.sock{{ cis_docker_regex_base_search_end }}"
@@ -172,8 +203,8 @@
 - name: "SECTION1 | 1.1.11 | Ensure auditing is configured for Docker files and directories - /etc/docker/daemon.json"
   ansible.builtin.lineinfile:
     dest: /etc/audit/rules.d/cis_docker_rule_1_1_3-18.rules
-    regexp: "{{ cis_docker_regex_base_search }}-w /etc/docker/daemon.json{{ cis_docker_regex_base_search_end }}"
-    line: "-w /etc/docker/daemon.json -k docker"
+    regexp: "{{ cis_docker_regex_base_search }}-w {{ cis_docker_daemon_json_root }}/daemon.json{{ cis_docker_regex_base_search_end }}"
+    line: "-w {{ cis_docker_daemon_json_root }}/daemon.json -k docker"
     state: present
     mode: "640"
     create: true

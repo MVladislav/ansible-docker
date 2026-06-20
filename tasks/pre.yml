@@ -3,6 +3,14 @@
 
 # ------------------------------------------------------------------------------
 
+- name: "PRE | 1.1.1 | Ensure a separate partition for containers has been created | ensure enabled else set default"
+  ansible.builtin.set_fact:
+    cis_docker_data_root: "/var/lib/docker"
+  when: not cis_docker_rule_1_1_1
+  tags:
+    - pre
+    - docker
+
 - name: "PRE | 1.1.3 - 1.1.18 | check if 'auditd' package is installed"
   ansible.builtin.command: dpkg -V auditd
   register: cis_docker_package_installed_auditd
@@ -10,5 +18,28 @@
   failed_when: false
   check_mode: false
   tags:
-    - docker
     - pre
+    - docker
+
+# ------------------------------------------------------------------------------
+
+- name: "PRE | 2.10 | Enable user namespace support | check if enabled and set infix-path variable"
+  ansible.builtin.set_fact:
+    cis_docker_namespace_remapping_path: "{{ '/165536.165536' if (cis_docker_rule_2_10 | bool) else '' }}"
+  tags:
+    - pre
+    - docker
+
+# ------------------------------------------------------------------------------
+
+- name: "PRE | 7.0 | Init swarm mode | get default ipv4 address"
+  ansible.builtin.set_fact:
+    cis_docker_swarm_advertise_addr: "{{ ansible_facts['default_ipv4']['address'] }}"
+  when:
+    - cis_docker_rule_7_0
+    - cis_docker_is_swarm_mode
+    - cis_docker_init_swarm_mode
+    - not (cis_docker_swarm_advertise_addr is defined)
+  tags:
+    - pre
+    - docker

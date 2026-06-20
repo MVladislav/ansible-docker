@@ -3,17 +3,22 @@
 
 # ------------------------------------------------------------------------------
 
-- name: "INSTALL | check python version for arg '--break-system-packages'"
-  ansible.builtin.set_fact:
-    py_extra_args: "--break-system-packages"
-  when:
-    - ansible_facts['python_version'] >= "3.11"
+- name: "INSTALL | uninstall old docker"
+  ansible.builtin.apt:
+    name:
+      - docker.io
+      - docker-compose
+      - docker-compose-v2
+      - docker-doc
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+    force_apt_get: true # apt-get instead of aptitude
   tags:
     - install
 
-# ------------------------------------------------------------------------------
-
-- name: "INSTALL | install docker dependencies (apt)"
+- name: "INSTALL | install docker dependencies"
   ansible.builtin.apt:
     name: "{{ cis_docker_package_dependencies }}"
     state: present
@@ -22,17 +27,6 @@
   when:
     - cis_docker_package_dependencies is defined
     - cis_docker_package_dependencies is not none
-  tags:
-    - install
-
-- name: "INSTALL | install docker dependencies (pip)"
-  ansible.builtin.pip:
-    name: "{{ item }}"
-    extra_args: "{{ py_extra_args | default('') }}"
-  loop: "{{ cis_docker_pip_dependencies | flatten(levels=1) }}"
-  when:
-    - cis_docker_pip_dependencies is defined
-    - cis_docker_pip_dependencies is not none
   tags:
     - install
 
@@ -159,18 +153,5 @@
   when:
     - cis_docker_install_apt is defined
     - cis_docker_install_apt is not none
-  tags:
-    - install
-
-# ------------------------------------------------------------------------------
-
-- name: "INSTALL | install docker packages (pip)"
-  ansible.builtin.pip:
-    name: "{{ item }}"
-    extra_args: "{{ py_extra_args | default('') }}"
-  loop: "{{ cis_docker_install_pip | flatten(levels=1) }}"
-  when:
-    - cis_docker_install_pip is defined
-    - cis_docker_install_pip is not none
   tags:
     - install
