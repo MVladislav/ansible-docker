@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
-      max-parallel: 4
+      max-parallel: 3
       matrix:
-        python-version: [{ version: "3.12", param: "--break-system-packages" }]
-        molecule-os: ["ubuntu2204", "ubuntu2404"]
+        python-version: [{ version: "3.13", param: "--break-system-packages" }]
+        molecule-os: ["ubuntu2204", "ubuntu2404", "ubuntu2604"]
 
     steps:
       # https://github.com/actions/checkout

@@ -209,7 +209,7 @@ cis_docker_is_swarm_mode: false
 cis_docker_init_swarm_mode: false
 
 # cis_docker_rule_2_6
-cis_docker_storage_driver: overlay2
+cis_docker_storage_driver: overlay2 # overlay2 | vfs | containerd | btrfs | zfs
 
 # cis_docker_rule_2_9
 cis_docker_default_ulimit_nofile_min: 65535

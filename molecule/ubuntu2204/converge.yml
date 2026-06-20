@@ -10,9 +10,14 @@
     cis_docker_user_shell: /bin/bash
     cis_docker_users_to_add_group:
       - name: "ubuntu"
-    # cis_docker_storage_driver: overlay2
+    cis_docker_storage_driver: vfs
     # rootless not possible to test under docker, because reboot is current needed
     cis_docker_rule_2_1: false # rootless installation mode
     cis_docker_rule_2_10: false # namespace user isolation
     cis_docker_is_swarm_mode: true # enabled into swarm mode
+    cis_docker_init_swarm_mode: true # init into swarm mode
     cis_docker_distribution_key_use_modern_sources: false # add apt source in modern style
+    # cis_docker_rule_7_5: false # Ensure that swarm manager is run in auto-lock mode
+    # cis_docker_rule_7_6: false # Ensure that the swarm manager auto-lock key is rotated periodically
+    # cis_docker_rule_7_7: true # Ensure that node certificates are rotated as appropriate
+    # cis_docker_rule_7_8: true # Ensure that CA certificates are rotated as appropriate
