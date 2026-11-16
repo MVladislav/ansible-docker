@@ -65,6 +65,14 @@ cis_docker_section7: true
 # Extend to install docker on system with
 # dependencies, gpg, source and services
 cis_docker_section_install: true
+
+# Extend to perform some workarounds and fixes
+# by default not extends are enabled, see variables below
+cis_docker_section_extended: true
+# - change apparmor for 'runc' to 'unconfined'
+cis_docker_apparmor_workaround: false
+# - add ufw firewall rule inside '/etc/ufw/after.rules'
+cis_docker_ufw_fix: false
 ```
 
 ### Variables which are recommended by CIS, but disable in this role by default

@@ -1,0 +1,107 @@
+---
+# tasks file for ansible-docker
+
+# ------------------------------------------------------------------------------
+
+- name: "EXTENDED | AppArmor Workaround | Ensure runc profile is unconfined"
+  when: cis_docker_apparmor_workaround
+  tags:
+    - apparmor
+    - docker
+  notify: Restart apparmor
+  block:
+    - name: "EXTENDED | AppArmor Workaround | Set runc to complain mode"
+      ansible.builtin.command: aa-complain /etc/apparmor.d/runc
+      register: apparmor_complain
+      changed_when: apparmor_complain.rc == 0
+    - name: "EXTENDED | AppArmor Workaround | Replace flags with unconfined"
+      ansible.builtin.replace:
+        path: /etc/apparmor.d/runc
+        regexp: '^(profile.*runc.*flags=\([^)]*)\bcomplain\b([^)]*\))'
+        replace: '\1unconfined\2'
+        mode: "0644"
+        owner: root
+        group: root
+
+# ------------------------------------------------------------------------------
+# https://github.com/chaifeng/ufw-docker
+# ------------------------------------------------------------------------------
+
+- name: "EXTENDED | UFW Docker Fix | Add UFW Docker compatibility rules"
+  when: cis_docker_ufw_fix
+  tags:
+    - ufw
+    - docker
+  notify: Restart ufw
+  block:
+    - name: "EXTENDED | UFW Docker Fix | Add rules to /etc/ufw/after.rules"
+      ansible.builtin.blockinfile:
+        path: /etc/ufw/after.rules
+        marker_begin: "# BEGIN UFW AND DOCKER FIX"
+        marker_end: "# END UFW AND DOCKER FIX"
+        create: true
+        mode: "0640"
+        owner: root
+        group: root
+        block: |
+          *filter
+          :ufw-user-forward - [0:0]
+          :ufw-docker-logging-deny - [0:0]
+          :DOCKER-USER - [0:0]
+          -A DOCKER-USER -j ufw-user-forward
+
+          -A DOCKER-USER -m conntrack --ctstate RELATED,ESTABLISHED -j RETURN
+          -A DOCKER-USER -m conntrack --ctstate INVALID -j DROP
+          -A DOCKER-USER -i docker0 -o docker0 -j ACCEPT
+
+          # allow communication between containers
+          -A DOCKER-USER -j RETURN -s 10.0.0.0/8
+          -A DOCKER-USER -j RETURN -s 172.16.0.0/12
+          -A DOCKER-USER -j RETURN -s 192.168.0.0/16
+
+          # allow established connections (e.g. initiated by a container)
+          -A DOCKER-USER -j ufw-docker-logging-deny -m conntrack --ctstate NEW -d 10.0.0.0/8
+          -A DOCKER-USER -j ufw-docker-logging-deny -m conntrack --ctstate NEW -d 172.16.0.0/12
+          -A DOCKER-USER -j ufw-docker-logging-deny -m conntrack --ctstate NEW -d 192.168.0.0/16
+
+          # block anything else
+          -A DOCKER-USER -j RETURN
+
+          -A ufw-docker-logging-deny -m limit --limit 3/min --limit-burst 10 -j LOG --log-prefix "[UFW DOCKER BLOCK] "
+          -A ufw-docker-logging-deny -j DROP
+
+          COMMIT
+
+    # - name: "EXTENDED | UFW Docker Fix | Comment out all *filter lines"
+    #   ansible.builtin.replace:
+    #     path: /etc/ufw/after.rules
+    #     regexp: '^\*filter$'
+    #     replace: "# *filter"
+    #     multiline: true
+
+    - name: "EXTENDED | UFW Docker Fix | Ensure *filter exists at the beginning"
+      ansible.builtin.blockinfile:
+        path: /etc/ufw/after.rules
+        marker_begin: "# BEGIN UFW AND DOCKER FIX - FILTER"
+        marker_end: "# END UFW AND DOCKER FIX - FILTER"
+        insertbefore: BOF
+        block: |
+          # Don't delete these required line, otherwise there will be errors
+          *filter
+
+    # - name: "EXTENDED | UFW Docker Fix | Comment out all COMMIT lines"
+    #   ansible.builtin.replace:
+    #     path: /etc/ufw/after.rules
+    #     regexp: "^COMMIT$"
+    #     replace: "# COMMIT"
+    #     multiline: true
+
+    - name: "EXTENDED | UFW Docker Fix | Add COMMIT at the end"
+      ansible.builtin.blockinfile:
+        path: /etc/ufw/after.rules
+        marker_begin: "# BEGIN UFW AND DOCKER FIX - COMMIT"
+        marker_end: "# END UFW AND DOCKER FIX - COMMIT"
+        insertafter: EOF
+        block: |
+          # don't delete the 'COMMIT' line or these rules won't be processed
+          COMMIT

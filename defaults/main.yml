@@ -6,6 +6,7 @@
 # CIS sections
 # ---------------------------------------
 cis_docker_section_install: true
+cis_docker_section_extended: true
 cis_docker_section1: true
 cis_docker_section2: true
 cis_docker_section3: true
@@ -237,3 +238,8 @@ cis_docker_swarm_cert_expiry: 48h
 # cis_docker_rule_7_9
 # cis_docker_swarm_advertise_addr: # NOTE: Example 192.168.0.1
 # cis_docker_swarm_data_path_addr: # NOTE: Example 17.1.0.3
+
+# ------------------------------------------------------------------------------
+
+cis_docker_apparmor_workaround: false
+cis_docker_ufw_fix: false

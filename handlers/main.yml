@@ -40,4 +40,26 @@
     masked: false
     state: restarted
   listen: Restart auditd-service
-  when: ansible_virtualization_type != "docker"
+  when: ansible_facts['virtualization_type'] != "docker"
+
+# ------------------------------------------------------------------------------
+
+- name: "HANDLER | EXTENDED | restart apparmor"
+  become: true
+  ansible.builtin.systemd_service:
+    name: apparmor
+    daemon_reload: true
+    enabled: true
+    masked: false
+    state: restarted
+  listen: Restart apparmor
+
+- name: "HANDLER | EXTENDED | restart ufw"
+  become: true
+  ansible.builtin.systemd_service:
+    name: ufw
+    daemon_reload: true
+    enabled: true
+    masked: false
+    state: restarted
+  listen: Restart ufw

@@ -77,3 +77,13 @@
   tags:
     - section7
     - docker
+
+# ------------------------------------------------------------------------------
+
+- name: "IMPORT TASK | extended"
+  ansible.builtin.import_tasks: extended.yml
+  become: true
+  when: cis_docker_section_extended
+  tags:
+    - extended
+    - docker
