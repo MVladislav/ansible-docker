@@ -119,11 +119,14 @@
 
 # old style
 - name: "INSTALL | add Docker repository into sources list"
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch={{ cis_docker_os_architecture.stdout }}
-      signed-by={{ cis_docker_install_gpg.path }}/{{ cis_docker_install_gpg.name }}]
-      {{ cis_docker_install_repo }} {{ cis_docker_os_distribution }} {{ cis_docker_install_version }}
+  ansible.builtin.deb822_repository:
+    name: "{{ cis_docker_apt_filename }}"
+    architectures: "{{ cis_docker_os_architecture.stdout }}"
+    signed_by: "{{ cis_docker_install_gpg.path }}/{{ cis_docker_install_gpg.name }}"
+    types: deb
+    uris: "{{ cis_docker_install_repo }}"
+    suites: "{{ cis_docker_os_distribution }}"
+    components: "{{ cis_docker_install_version }}"
     state: present
     mode: "0644"
   when: not cis_docker_distribution_key_use_modern_sources
