@@ -32,9 +32,10 @@
 
 # ------------------------------------------------------------------------------
 
-- name: "PRE | 7.0 | Init swarm mode | get default ipv4 address"
+- name: "PRE | 7.0 | Init swarm mode | get default ipv4/ipv6 address"
   ansible.builtin.set_fact:
-    cis_docker_swarm_advertise_addr: "{{ ansible_facts['default_ipv4']['address'] }}"
+    cis_docker_swarm_advertise_addr: >
+      {{ (ansible_facts['default_ipv4'] | default({})).get('address') or (ansible_facts['default_ipv6'] | default({})).get('address') }}
   when:
     - cis_docker_rule_7_0
     - cis_docker_is_swarm_mode
