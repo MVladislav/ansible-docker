@@ -166,6 +166,7 @@ cis_docker_package_dependencies:
   - apt-transport-https
   - software-properties-common
   - gnupg-agent
+  - python3-debian
 
 cis_docker_install_gpg:
   id: 0EBFCD88
@@ -188,7 +189,7 @@ cis_docker_install_apt:
 
 cis_docker_user_default: docker
 cis_docker_group_default: docker
-cis_docker_user_shell: /bin/bash
+cis_docker_user_shell: /usr/sbin/nologin # /bin/bash
 
 cis_docker_daemon_json_root: /etc/docker
 cis_docker_daemon_json_rootless: ~/.config/docker
